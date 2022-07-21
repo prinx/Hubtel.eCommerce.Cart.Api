@@ -1,0 +1,12 @@
+﻿namespace Hubtel.eCommerce.Cart.Api.Models
+{
+    public class CartItem
+    {
+        public long Id { get; set; }
+        public int Quantity { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public long ProductId { get; set; }
+        public Product? Product { get; set; }
+    }
+}
