@@ -155,15 +155,16 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<Product>> PostProduct(ProductPostDTO product)
         {
             try
             {
                 product.Name.Trim();
+                ValidateSentProduct(product);
 
                 if (_context.Products.Any(e => product.Name == e.Name))
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with id {product.Id} already exists. Cannot created new product.");
+                    _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with Name {product.Name} already exists. Cannot created new product.");
 
                     return Conflict(new
                     {
@@ -174,17 +175,24 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     });
                 }
 
-                _context.Products.Add(product);
+                var newProduct = new Product
+                {
+                    Name = product.Name,
+                    UnitPrice = product.UnitPrice,
+                    QuantityInStock = product.QuantityInStock
+                };
+
+                _context.Products.Add(newProduct);
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with name '{product.Name}' created successfully.");
 
-                return CreatedAtAction("GetProduct", new { id = product.Id }, new
+                return CreatedAtAction("GetProduct", new { id = newProduct.Id }, new
                 {
                     status = HttpStatusCode.Created,
                     success = true,
                     message = "Product created successfully.",
-                    data = product
+                    data = newProduct
                 });
             }
             catch (Exception e)
@@ -231,6 +239,24 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             catch (Exception e)
             {
                 return GenericError($"[{DateTime.Now}] DELETE: api/Products/{id}: An error happened: {e}");
+            }
+        }
+
+        private void ValidateSentProduct(ProductPostDTO product)
+        {
+            if (product.UnitPrice < 0)
+            {
+                throw new ArgumentException("Product unit price invalid");
+            }
+
+            if (product.Name.Length <= 1)
+            {
+                throw new ArgumentException("Product name too short");
+            }
+
+            if (product.Name.Length <= 50)
+            {
+                throw new ArgumentException("Product name too long");
             }
         }
 

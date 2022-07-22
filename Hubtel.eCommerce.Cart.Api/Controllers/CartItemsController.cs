@@ -177,7 +177,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // POST: api/CartItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CartItem>> PostCartItem(CartItem cartItem)
+        public async Task<ActionResult<CartItem>> PostCartItem(CartItemPostDTO cartItem)
         {
             try
             {
@@ -216,11 +216,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 }
                 else
                 {
-                    CreateCartItem(cartItem);
+                    var newItemId = await CreateCartItem(cartItem);
 
                     _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
 
-                    return CreatedAtAction(nameof(GetCartItem), new { id = cartItem.Id }, new ApiResponseDTO
+                    return CreatedAtAction(nameof(GetCartItem), new { id = newItemId }, new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.Created,
                         Success = true,
@@ -298,7 +298,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
         }
 
-        private async Task<CartItem> RetrieveFullCartItem(CartItem cartItem)
+        private async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
         {
             return await _context.CartItems
                 .Where(item => item.UserId == cartItem.UserId && item.ProductId == cartItem.ProductId)
@@ -320,18 +320,21 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             await _context.SaveChangesAsync();
         }
 
-        private async void CreateCartItem(CartItem item)
+        private async Task<long> CreateCartItem(CartItemPostDTO item)
         {
-            _context.CartItems.Add(new CartItem
+            var newItem = new CartItem
             {
                 UserId = item.UserId,
                 ProductId = item.ProductId,
                 Quantity = item.Quantity
-            });
+            };
+            _context.CartItems.Add(newItem);
             await _context.SaveChangesAsync();
+
+            return newItem.Id;
         }
 
-        private async Task ValidatePostRequestBody(CartItem cartItem)
+        private async Task ValidatePostRequestBody(CartItemPostDTO cartItem)
         {
             if (cartItem.Quantity == 0)
             {

@@ -156,7 +156,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(UserPostDTO user)
         {
             try
             {
@@ -176,17 +176,24 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     });
                 }
 
-                _context.Users.Add(user);
+                var newUser = new User
+                {
+                    Name = user.Name,
+                    PhoneNumber = user.PhoneNumber,
+                };
+
+                _context.Users.Add(newUser);
+
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
 
-                return CreatedAtAction("GetUser", new { id = user.Id }, new
+                return CreatedAtAction("GetUser", new { id = newUser.Id }, new
                 {
                     status = HttpStatusCode.Created,
                     success = true,
                     message = "User created successfully.",
-                    data = user
+                    data = newUser
                 });
             }
             catch (Exception e)
