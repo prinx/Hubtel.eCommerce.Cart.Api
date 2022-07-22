@@ -22,28 +22,6 @@ namespace Hubtel.eCommerce.Cart.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Hubtel.eCommerce.Cart.Api.Models.Cart", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Carts");
-                });
-
             modelBuilder.Entity("Hubtel.eCommerce.Cart.Api.Models.CartItem", b =>
                 {
                     b.Property<long>("Id")
@@ -51,9 +29,6 @@ namespace Hubtel.eCommerce.Cart.Api.Migrations
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CartId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -64,11 +39,14 @@ namespace Hubtel.eCommerce.Cart.Api.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CartId");
-
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CartItems");
                 });
@@ -123,40 +101,28 @@ namespace Hubtel.eCommerce.Cart.Api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Hubtel.eCommerce.Cart.Api.Models.Cart", b =>
-                {
-                    b.HasOne("Hubtel.eCommerce.Cart.Api.Models.User", "User")
-                        .WithOne("Cart")
-                        .HasForeignKey("Hubtel.eCommerce.Cart.Api.Models.Cart", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Hubtel.eCommerce.Cart.Api.Models.CartItem", b =>
                 {
-                    b.HasOne("Hubtel.eCommerce.Cart.Api.Models.Cart", null)
-                        .WithMany("CartItems")
-                        .HasForeignKey("CartId");
-
                     b.HasOne("Hubtel.eCommerce.Cart.Api.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product");
-                });
+                    b.HasOne("Hubtel.eCommerce.Cart.Api.Models.User", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("Hubtel.eCommerce.Cart.Api.Models.Cart", b =>
-                {
-                    b.Navigation("CartItems");
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Hubtel.eCommerce.Cart.Api.Models.User", b =>
                 {
-                    b.Navigation("Cart");
+                    b.Navigation("CartItems");
                 });
 #pragma warning restore 612, 618
         }
