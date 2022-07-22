@@ -31,6 +31,19 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 var query = _context.Users.AsQueryable();
                 var users = await PaginationService.Paginate(query, page);
 
+                if (users.Items.Count <= 0)
+                {
+                    _logger.LogInformation($"GET: api/Users: No user found.");
+
+                    return NotFound(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Success = false,
+                        Message = "No user found.",
+                        Data = users
+                    });
+                }
+
                 return Ok(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.OK,
@@ -41,7 +54,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/Users: An error happened while retrieving cart items from database: {e}");
+                return GenericError($"GET: api/Users: An error happened: {e}");
             }
         }
 

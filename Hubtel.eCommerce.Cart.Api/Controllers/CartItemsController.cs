@@ -42,9 +42,22 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 var pageItems = await PaginationService.Paginate(query, page);
 
-                var message = pageItems.Items.Count == 0 ? "No cart item found." : $"{pageItems.Items.Count} cart item(s) Found.";
+                if (pageItems.Items.Count <= 0)
+                {
+                    _logger.LogInformation($"GET: api/CartItems: No cart item found.");
 
-                _logger.LogInformation(message);
+                    return NotFound(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Success = false,
+                        Message = "No cart item found.",
+                        Data = pageItems
+                    });
+                }
+
+                var message = $"{pageItems.Items.Count} cart item(s) Found.";
+                
+                _logger.LogInformation($"GET: api/CartItems: {message}");
 
                 return Ok(new ApiResponseDTO
                 {
