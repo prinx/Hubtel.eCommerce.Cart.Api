@@ -96,27 +96,34 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(long id, User user)
+        public async Task<IActionResult> PutUser(long id, UserPostDTO user)
         {
             try
             {
                 var logMessage = "";
 
-                if (id != user.Id)
+                //if (id != user.Id)
+                //{
+                //    logMessage = "Invalid User or Id.";
+                //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
+
+                //    return BadRequest(new
+                //    {
+                //        status = HttpStatusCode.BadRequest,
+                //        success = false,
+                //        message = logMessage,
+                //        data = user
+                //    });
+                //}
+
+                var updatedUser = new User
                 {
-                    logMessage = "Invalid User or Id.";
-                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
+                    Id = id,
+                    Name = user.Name,
+                    PhoneNumber = user.PhoneNumber
+                };
 
-                    return BadRequest(new
-                    {
-                        status = HttpStatusCode.BadRequest,
-                        success = false,
-                        message = logMessage,
-                        data = user
-                    });
-                }
-
-                _context.Entry(user).State = EntityState.Modified;
+                _context.Entry(updatedUser).State = EntityState.Modified;
 
                 try
                 {
@@ -134,7 +141,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                             status = HttpStatusCode.NotFound,
                             success = false,
                             message = logMessage,
-                            data = user
+                            data = updatedUser
                         });
                     }
                     else

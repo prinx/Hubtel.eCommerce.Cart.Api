@@ -130,19 +130,26 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         {
             try
             {
-                if (id != cartItem.Id)
+                //if (id != cartItem.Id)
+                //{
+                //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Id and cart item to update mismatch.");
+
+                //    return BadRequest(new ApiResponseDTO
+                //    {
+                //        Status = (int)HttpStatusCode.BadRequest,
+                //        Success = false,
+                //        Message = "Id and cart item to update mismatch."
+                //    });
+                //}
+
+                var updatedCartItem = new CartItem
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Id and cart item to update mismatch.");
+                    Id = id,
+                    ProductId = cartItem.ProductId,
+                    UserId = cartItem.UserId
+                };
 
-                    return BadRequest(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.BadRequest,
-                        Success = false,
-                        Message = "Id and cart item to update mismatch."
-                    });
-                }
-
-                _context.Entry(cartItem).State = EntityState.Modified;
+                _context.Entry(updatedCartItem).State = EntityState.Modified;
 
                 await _context.SaveChangesAsync();
 

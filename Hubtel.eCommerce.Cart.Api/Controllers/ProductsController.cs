@@ -95,27 +95,35 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(long id, Product product)
+        public async Task<IActionResult> PutProduct(long id, ProductPostDTO product)
         {
             try
             {
                 var logMessage = "";
 
-                if (id != product.Id)
+                //if (id != product.Id)
+                //{
+                //    logMessage = "Invalid Product or Id.";
+                //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
+
+                //    return BadRequest(new
+                //    {
+                //        status = HttpStatusCode.BadRequest,
+                //        success = false,
+                //        message = logMessage,
+                //        data = product
+                //    });
+                //}
+
+                var updatedProduct = new Product
                 {
-                    logMessage = "Invalid Product or Id.";
-                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
+                    Id = id,
+                    Name = product.Name,
+                    UnitPrice = product.UnitPrice,
+                    QuantityInStock = product.QuantityInStock
+                };
 
-                    return BadRequest(new
-                    {
-                        status = HttpStatusCode.BadRequest,
-                        success = false,
-                        message = logMessage,
-                        data = product
-                    });
-                }
-
-                _context.Entry(product).State = EntityState.Modified;
+                _context.Entry(updatedProduct).State = EntityState.Modified;
 
                 try
                 {
@@ -133,7 +141,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                             status = HttpStatusCode.NotFound,
                             success = false,
                             message = logMessage,
-                            data = product
+                            data = updatedProduct
                         });
                     }
                     else
@@ -254,7 +262,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 throw new ArgumentException("Product name too short");
             }
 
-            if (product.Name.Length <= 50)
+            if (product.Name.Length > 50)
             {
                 throw new ArgumentException("Product name too long");
             }
