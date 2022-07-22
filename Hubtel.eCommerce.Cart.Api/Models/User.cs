@@ -7,6 +7,8 @@
         public string PhoneNumber { get; set; } = "";
         public DateTime CreatedAt { get; set; }
 
-        public Cart? Cart { get; set; }
+        //public Cart? Cart { get; set; }
+
+        public List<CartItem>? CartItems { get; set; }
     }
 }
