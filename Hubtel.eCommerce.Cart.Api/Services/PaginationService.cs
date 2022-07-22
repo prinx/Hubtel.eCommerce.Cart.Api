@@ -5,7 +5,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 {
     public static class PaginationService
     {
-        private static readonly int _defaultPageSize = 10;
+        private static readonly int _defaultPageSize = 3;
 
         public static async Task<Pagination<T>> Paginate<T>(IQueryable<T> query, int currentPage, int pageSize = 0)
         {
