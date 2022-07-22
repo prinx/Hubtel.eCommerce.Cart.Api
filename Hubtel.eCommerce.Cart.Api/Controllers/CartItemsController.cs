@@ -24,7 +24,8 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int maxQuantity = default,
             [FromQuery] DateTime from = default,
             [FromQuery] DateTime to = default,
-            [FromQuery] int page = 1)
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 3)
         {
             try
             {
@@ -40,7 +41,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     .Include(item => item.Product)
                     .AsQueryable();
 
-                var pageItems = await PaginationService.Paginate(query, page);
+                var pageItems = await PaginationService.Paginate(query, page, pageSize);
 
                 if (pageItems.Items.Count <= 0)
                 {

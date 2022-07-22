@@ -24,12 +24,13 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers(
-            [FromQuery] int page = 1)
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 3)
         {
             try
             {
                 var query = _context.Users.AsQueryable();
-                var users = await PaginationService.Paginate(query, page);
+                var users = await PaginationService.Paginate(query, page, pageSize);
 
                 if (users.Items.Count <= 0)
                 {
