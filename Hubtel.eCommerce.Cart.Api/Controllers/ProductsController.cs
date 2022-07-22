@@ -32,7 +32,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (users.Items.Count <= 0)
                 {
-                    _logger.LogInformation($"GET: api/Products: No product found.");
+                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Products: No product found.");
 
                     return NotFound(new ApiResponseDTO
                     {
@@ -53,7 +53,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/Products: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] GET: api/Products: An error happened: {e}");
             }
         }
 
@@ -67,7 +67,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (product == null)
                 {
-                    _logger.LogInformation($"GET: api/Products/{id}: Product not found.");
+                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Products/{id}: Product not found.");
 
                     return NotFound(new
                     {
@@ -88,7 +88,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/Products/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] GET: api/Products/{id}: An error happened: {e}");
             }
         }
 
@@ -104,7 +104,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 if (id != product.Id)
                 {
                     logMessage = "Invalid Product or Id.";
-                    _logger.LogInformation($"PUT: api/Products/{id}: {logMessage}");
+                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
 
                     return BadRequest(new
                     {
@@ -126,7 +126,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     if (!ProductExists(id))
                     {
                         logMessage = "Product not found.";
-                        _logger.LogInformation($"PUT: api/Products/{id}: {logMessage}");
+                        _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
 
                         return NotFound(new
                         {
@@ -142,13 +142,13 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     }
                 }
 
-                _logger.LogInformation($"PUT: api/Products/{id}: Product updated successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
 
                 return NoContent();
             }
             catch (Exception e)
             {
-                return GenericError($"PUT: api/Products/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] PUT: api/Products/{id}: An error happened: {e}");
             }
         }
 
@@ -163,7 +163,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (_context.Products.Any(e => product.Name == e.Name))
                 {
-                    _logger.LogInformation($"POST: api/Products: Product with id {product.Id} already exists. Cannot created new product.");
+                    _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with id {product.Id} already exists. Cannot created new product.");
 
                     return Conflict(new
                     {
@@ -177,7 +177,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"POST: api/Products: Product with name '{product.Name}' created successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with name '{product.Name}' created successfully.");
 
                 return CreatedAtAction("GetProduct", new { id = product.Id }, new
                 {
@@ -189,7 +189,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"POST: api/Products: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] POST: api/Products: An error happened: {e}");
             }
         }
 
@@ -202,7 +202,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 var product = await _context.Products.FindAsync(id);
                 if (product == null)
                 {
-                    _logger.LogInformation($"DELETE: api/Products/{id}: Product with id {id} does not exist. Cannot delete product.");
+                    _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} does not exist. Cannot delete product.");
 
                     return NotFound(new
                     {
@@ -216,7 +216,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"DELETE: api/Products/{id}: Product with id {id} deleted successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} deleted successfully.");
 
                 return Ok(new
                 {
@@ -230,7 +230,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"DELETE: api/Products/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] DELETE: api/Products/{id}: An error happened: {e}");
             }
         }
 

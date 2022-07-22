@@ -44,7 +44,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (pageItems.Items.Count <= 0)
                 {
-                    _logger.LogInformation($"GET: api/CartItems: No cart item found.");
+                    _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
 
                     return NotFound(new ApiResponseDTO
                     {
@@ -57,7 +57,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 var message = $"{pageItems.Items.Count} cart item(s) Found.";
                 
-                _logger.LogInformation($"GET: api/CartItems: {message}");
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: {message}");
 
                 return Ok(new ApiResponseDTO
                 {
@@ -69,7 +69,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (ArgumentException e)
             {
-                _logger.LogInformation($"GET: api/CartItems: {e.Message}");
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: {e.Message}");
 
                 return BadRequest(new ApiResponseDTO
                 {
@@ -80,7 +80,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/CartItems: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] GET: api/CartItems: An error happened: {e}");
             }
         }
 
@@ -96,7 +96,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 if (item == null)
                 {
                     message = "Cart item not found.";
-                    _logger.LogInformation($"GET: api/CartItems/{id}: {message}");
+                    _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems/{id}: {message}");
 
                     return NotFound(new ApiResponseDTO
                     {
@@ -107,7 +107,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 }
 
                 message = "Found.";
-                _logger.LogInformation($"GET: api/CartItems/{id}: {message}");
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems/{id}: {message}");
 
                 return Ok(new ApiResponseDTO
                 {
@@ -119,7 +119,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/CartItems/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] GET: api/CartItems/{id}: An error happened: {e}");
             }
         }
 
@@ -132,7 +132,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 if (id != cartItem.Id)
                 {
-                    _logger.LogInformation($"PUT: api/CartItems/{id}: Id and cart item to update mismatch.");
+                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Id and cart item to update mismatch.");
 
                     return BadRequest(new ApiResponseDTO
                     {
@@ -146,7 +146,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"PUT: api/CartItems/{id}: Cart item updated successfuly.");
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item updated successfuly.");
 
                 return NoContent();
             }
@@ -154,7 +154,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 if (!CartItemExists(id))
                 {
-                    _logger.LogInformation($"PUT: api/CartItems/{id}: Cart item to update not found.");
+                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item to update not found.");
 
                     return NotFound(new ApiResponseDTO
                     {
@@ -170,7 +170,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"PUT: api/CartItems/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] PUT: api/CartItems/{id}: An error happened: {e}");
             }
         }
 
@@ -185,7 +185,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogInformation($"POST: api/CartItems: {ex.Message}");
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: {ex.Message}");
 
                 return BadRequest(new ApiResponseDTO
                 {
@@ -204,7 +204,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
-                    _logger.LogInformation($"POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
+                    _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
 
                     return CreatedAtAction(nameof(GetCartItem), new { id = fullItem.Id }, new ApiResponseDTO
                     {
@@ -218,7 +218,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     CreateCartItem(cartItem);
 
-                    _logger.LogInformation($"POST: api/CartItems: New cart item created for user {cartItem.UserId}");
+                    _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
 
                     return CreatedAtAction(nameof(GetCartItem), new { id = cartItem.Id }, new ApiResponseDTO
                     {
@@ -231,7 +231,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"POST: api/CartItems: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] POST: api/CartItems: An error happened: {e}");
             }
         }
 
@@ -245,7 +245,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (cartItem == null)
                 {
-                    _logger.LogInformation($"DELETE: api/CartItems/{id}: Cart item does not exist. Cannot delete.");
+                    _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart item does not exist. Cannot delete.");
 
                     return NotFound(new ApiResponseDTO
                     {
@@ -258,13 +258,13 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 _context.CartItems.Remove(cartItem);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"DELETE: api/CartItems/{id}: Cart item deleted successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart item deleted successfully.");
 
                 return NoContent();
             }
             catch (Exception e)
             {
-                return GenericError($"DELETE: api/CartItems/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] DELETE: api/CartItems/{id}: An error happened: {e}");
             }
         }
 

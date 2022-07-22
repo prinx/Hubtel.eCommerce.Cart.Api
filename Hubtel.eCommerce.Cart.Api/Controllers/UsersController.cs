@@ -33,7 +33,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (users.Items.Count <= 0)
                 {
-                    _logger.LogInformation($"GET: api/Users: No user found.");
+                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Users: No user found.");
 
                     return NotFound(new ApiResponseDTO
                     {
@@ -54,7 +54,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/Users: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] GET: api/Users: An error happened: {e}");
             }
         }
 
@@ -68,7 +68,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (user == null)
                 {
-                    _logger.LogInformation($"GET: api/Users/{id}: User not found.");
+                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Users/{id}: User not found.");
 
                     return NotFound(new
                     {
@@ -89,7 +89,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"GET: api/Users/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] GET: api/Users/{id}: An error happened: {e}");
             }
         }
 
@@ -105,7 +105,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 if (id != user.Id)
                 {
                     logMessage = "Invalid User or Id.";
-                    _logger.LogInformation($"PUT: api/Users/{id}: {logMessage}");
+                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
 
                     return BadRequest(new
                     {
@@ -127,7 +127,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     if (!UserExists(id))
                     {
                         logMessage = "User not found.";
-                        _logger.LogInformation($"PUT: api/Users/{id}: {logMessage}");
+                        _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
 
                         return NotFound(new
                         {
@@ -143,13 +143,13 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     }
                 }
 
-                _logger.LogInformation($"PUT: api/Users/{id}: User updated successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
 
                 return NoContent();
             }
             catch (Exception e)
             {
-                return GenericError($"PUT: api/Users/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] PUT: api/Users/{id}: An error happened: {e}");
             }
         }
 
@@ -165,7 +165,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 if (_context.Users.Any(user => user.PhoneNumber == user.PhoneNumber))
                 {
-                    _logger.LogInformation($"POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
+                    _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
 
                     return Conflict(new
                     {
@@ -179,7 +179,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
 
                 return CreatedAtAction("GetUser", new { id = user.Id }, new
                 {
@@ -191,7 +191,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"POST: api/Users: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] POST: api/Users: An error happened: {e}");
             }
         }
 
@@ -204,7 +204,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    _logger.LogInformation($"DELETE: api/Users/{id}: User does not exist. Cannot delete.");
+                    _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User does not exist. Cannot delete.");
 
                     return NotFound(new
                     {
@@ -218,7 +218,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"DELETE: api/Users/{id}: User deleted successfully.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 
                 return Ok(new
                 {
@@ -232,7 +232,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (Exception e)
             {
-                return GenericError($"DELETE: api/Users/{id}: An error happened: {e}");
+                return GenericError($"[{DateTime.Now}] DELETE: api/Users/{id}: An error happened: {e}");
             }
         }
 
