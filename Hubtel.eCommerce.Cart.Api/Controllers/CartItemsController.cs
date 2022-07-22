@@ -91,9 +91,8 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 var message = "";
                 var item = await _context.CartItems
-                    .Where(e => e.Id == id)
                     .Include(e => e.Product)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync(e => e.Id == id);
 
                 if (item == null)
                 {
@@ -127,7 +126,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/CartItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCartItem(long id, CartItem cartItem)
+        public async Task<IActionResult> PutCartItem(long id, CartItemPostDTO cartItem)
         {
             try
             {
@@ -281,7 +280,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             DateTime endDate = default
         )
         {
-            if (phoneNumber != default && (phoneNumber.Length > 12 || phoneNumber.Length < 9))
+            if (phoneNumber != default && (phoneNumber.Length > 15 || phoneNumber.Length < 9))
             {
                 throw new ArgumentException("Invalid phone number");
             }
