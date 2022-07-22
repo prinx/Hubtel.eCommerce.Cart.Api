@@ -166,7 +166,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 user.Name.Trim();
                 user.PhoneNumber.Trim();
 
-                if (_context.Users.Any(user => user.PhoneNumber == user.PhoneNumber))
+                if (_context.Users.Any(e => e.PhoneNumber == user.PhoneNumber))
                 {
                     _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
 
