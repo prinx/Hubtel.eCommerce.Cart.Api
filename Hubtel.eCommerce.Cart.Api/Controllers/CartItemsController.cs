@@ -39,7 +39,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     .Where(item => from == default || (from != default && item.CreatedAt >= from))
                     .Where(item => to == default || (to != default && item.CreatedAt <= to))
                     .Include(item => item.Product)
-                    .Include(item => item.User)
                     .AsQueryable();
 
                 var pageItems = await PaginationService.Paginate(query, page, pageSize);
@@ -93,7 +92,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 var message = "";
                 var item = await _context.CartItems
                     .Where(e => e.Id == id)
-                    .Include(e => e.User)
                     .Include(e => e.Product)
                     .FirstAsync();
 
