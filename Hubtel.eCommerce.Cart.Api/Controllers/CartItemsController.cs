@@ -223,16 +223,16 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 }
                 else
                 {
-                    var newItemId = await CreateCartItem(cartItem);
+                    var newItem = await CreateCartItem(cartItem);
 
                     _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
 
-                    return CreatedAtAction(nameof(GetCartItem), new { id = newItemId }, new ApiResponseDTO
+                    return CreatedAtAction(nameof(GetCartItem), new { id = newItem.Id }, new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.Created,
                         Success = true,
                         Message = "Product(s) added to cart successfully",
-                        Data = cartItem
+                        Data = newItem
                     });
                 }
             }
@@ -326,7 +326,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             await _context.SaveChangesAsync();
         }
 
-        private async Task<long> CreateCartItem(CartItemPostDTO item)
+        private async Task<CartItem> CreateCartItem(CartItemPostDTO item)
         {
             var newItem = new CartItem
             {
@@ -337,7 +337,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             _context.CartItems.Add(newItem);
             await _context.SaveChangesAsync();
 
-            return newItem.Id;
+            return newItem;
         }
 
         private async Task ValidatePostRequestBody(CartItemPostDTO cartItem)
