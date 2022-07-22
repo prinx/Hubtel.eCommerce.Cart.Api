@@ -38,7 +38,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     return NotFound(new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.NotFound,
-                        Success = false,
                         Message = "No product found.",
                         Data = users
                     });
@@ -70,21 +69,19 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     _logger.LogInformation($"[{DateTime.Now}] GET: api/Products/{id}: Product not found.");
 
-                    return NotFound(new
+                    return NotFound(new ApiResponseDTO
                     {
-                        status = HttpStatusCode.NotFound,
-                        success = false,
-                        message = "Product not found.",
-                        data = (object)null
+                        Status = (int)HttpStatusCode.NotFound,
+                        Message = "Product not found."
                     });
                 }
 
-                return Ok(new
+                return Ok(new ApiResponseDTO
                 {
-                    status = HttpStatusCode.OK,
-                    success = true,
-                    message = "Found.",
-                    data = product
+                    Status = (int)HttpStatusCode.OK,
+                    Success = true,
+                    Message = "Found.",
+                    Data = product
                 });
             }
             catch (Exception e)
@@ -137,12 +134,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                         logMessage = "Product not found.";
                         _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
 
-                        return NotFound(new
+                        return NotFound(new ApiResponseDTO
                         {
-                            status = HttpStatusCode.NotFound,
-                            success = false,
-                            message = logMessage,
-                            data = updatedProduct
+                            Status = (int)HttpStatusCode.NotFound,
+                            Message = logMessage,
+                            Data = updatedProduct
                         });
                     }
                     else
@@ -175,12 +171,10 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with Name {product.Name} already exists. Cannot created new product.");
 
-                    return Conflict(new
+                    return Conflict(new ApiResponseDTO
                     {
-                        status = HttpStatusCode.Conflict,
-                        success = false,
-                        message = "Product already exists.",
-                        data = (object)null
+                        Status = (int)HttpStatusCode.Conflict,
+                        Message = "Product already exists."
                     });
                 }
 
@@ -196,12 +190,12 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with name '{product.Name}' created successfully.");
 
-                return CreatedAtAction("GetProduct", new { id = newProduct.Id }, new
+                return CreatedAtAction("GetProduct", new { id = newProduct.Id }, new ApiResponseDTO
                 {
-                    status = HttpStatusCode.Created,
-                    success = true,
-                    message = "Product created successfully.",
-                    data = newProduct
+                    Status = (int)HttpStatusCode.Created,
+                    Success = true,
+                    Message = "Product created successfully.",
+                    Data = newProduct
                 });
             }
             catch (Exception e)
@@ -221,12 +215,10 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} does not exist. Cannot delete product.");
 
-                    return NotFound(new
+                    return NotFound(new ApiResponseDTO
                     {
-                        status = HttpStatusCode.Created,
-                        success = true,
-                        message = "Product created successfully.",
-                        data = product
+                        Status = (int)HttpStatusCode.NotFound,
+                        Message = "Product not found."
                     });
                 }
 
@@ -235,12 +227,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} deleted successfully.");
 
-                return Ok(new
+                return Ok(new ApiResponseDTO
                 {
-                    status = HttpStatusCode.OK,
-                    success = true,
-                    message = "Product deleted successfully.",
-                    data = (object)null
+                    Status = (int)HttpStatusCode.OK,
+                    Success = true,
+                    Message = "Product deleted successfully."
                 });
 
                 //return NoContent();

@@ -50,7 +50,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     return NotFound(new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.NotFound,
-                        Success = false,
                         Message = "No cart item found.",
                         Data = pageItems
                     });
@@ -75,7 +74,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 return BadRequest(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.BadRequest,
-                    Success = false,
                     Message = e.Message
                 });
             }
@@ -102,7 +100,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     return NotFound(new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.NotFound,
-                        Success = false,
                         Message = message
                     });
                 }
@@ -138,7 +135,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 //    return BadRequest(new ApiResponseDTO
                 //    {
                 //        Status = (int)HttpStatusCode.BadRequest,
-                //        Success = false,
                 //        Message = "Id and cart item to update mismatch."
                 //    });
                 //}
@@ -167,7 +163,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     return NotFound(new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.NotFound,
-                        Success = false,
                         Message = "Cart item to update not found."
                     });
                 }
@@ -198,7 +193,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 return BadRequest(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.BadRequest,
-                    Success = false,
                     Message = ex.Message,
                     Data = cartItem
                 });
@@ -258,7 +252,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     return NotFound(new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.NotFound,
-                        Success = false,
                         Message = "Cart item not found."
                     });
                 }

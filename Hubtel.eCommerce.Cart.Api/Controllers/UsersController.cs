@@ -39,7 +39,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     return NotFound(new ApiResponseDTO
                     {
                         Status = (int)HttpStatusCode.NotFound,
-                        Success = false,
                         Message = "No user found.",
                         Data = users
                     });
@@ -71,21 +70,19 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     _logger.LogInformation($"[{DateTime.Now}] GET: api/Users/{id}: User not found.");
 
-                    return NotFound(new
+                    return NotFound(new ApiResponseDTO
                     {
-                        status = HttpStatusCode.NotFound,
-                        success = false,
-                        message = "User not found.",
-                        data = (object)null
+                        Status = (int)HttpStatusCode.NotFound,
+                        Message = "User not found."
                     });
                 }
 
-                return Ok(new
+                return Ok(new ApiResponseDTO
                 {
-                    status = HttpStatusCode.OK,
-                    success = true,
-                    message = "Found.",
-                    data = user
+                    Status = (int)HttpStatusCode.OK,
+                    Success = true,
+                    Message = "Found.",
+                    Data = user
                 });
             }
             catch (Exception e)
@@ -108,12 +105,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 //    logMessage = "Invalid User or Id.";
                 //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
 
-                //    return BadRequest(new
-                //    {
-                //        status = HttpStatusCode.BadRequest,
-                //        success = false,
-                //        message = logMessage,
-                //        data = user
+                //    return BadRequest(new ApiResponseDTO
+                //   {
+                //        Status = (int)HttpStatusCode.BadRequest,
+                //        Message = logMessage,
+                //        Data = user
                 //    });
                 //}
 
@@ -136,13 +132,12 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     {
                         logMessage = "User not found.";
                         _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
-
-                        return NotFound(new
+                        
+                        return NotFound(new ApiResponseDTO
                         {
-                            status = HttpStatusCode.NotFound,
-                            success = false,
-                            message = logMessage,
-                            data = updatedUser
+                            Status = (int)HttpStatusCode.NotFound,
+                            Message = logMessage,
+                            Data = updatedUser
                         });
                     }
                     else
@@ -175,12 +170,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
 
-                    return Conflict(new
+                    return Conflict(new ApiResponseDTO
                     {
-                        status = HttpStatusCode.Conflict,
-                        success = false,
-                        message = "User already exists.",
-                        data = user
+                        Status = (int)HttpStatusCode.Conflict,
+                        Message = "User already exists.",
+                        Data = user
                     });
                 }
 
@@ -196,12 +190,12 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
 
-                return CreatedAtAction("GetUser", new { id = newUser.Id }, new
+                return CreatedAtAction("GetUser", new { id = newUser.Id }, new ApiResponseDTO
                 {
-                    status = HttpStatusCode.Created,
-                    success = true,
-                    message = "User created successfully.",
-                    data = newUser
+                    Status = (int)HttpStatusCode.Created,
+                    Success = true,
+                    Message = "User created successfully.",
+                    Data = newUser
                 });
             }
             catch (Exception e)
@@ -221,12 +215,10 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 {
                     _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User does not exist. Cannot delete.");
 
-                    return NotFound(new
+                    return NotFound(new ApiResponseDTO
                     {
-                        status = HttpStatusCode.NotFound,
-                        success = true,
-                        message = "User not found.",
-                        data = (object)null
+                        Status = (int)HttpStatusCode.NotFound,
+                        Message = "User not found."
                     });
                 }
 
@@ -235,12 +227,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 
-                return Ok(new
+                return Ok(new ApiResponseDTO
                 {
-                    status = HttpStatusCode.OK,
-                    success = true,
-                    message = "User deleted usccessfully.",
-                    data = (object)null
+                    Status = (int)HttpStatusCode.OK,
+                    Success = true,
+                    Message = "User deleted usccessfully."
                 });
 
                 //return NoContent();
