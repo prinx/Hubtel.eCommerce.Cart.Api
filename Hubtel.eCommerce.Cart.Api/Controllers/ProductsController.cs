@@ -14,10 +14,15 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : CustomBaseController
+    public class ProductsController : ControllerBase
     {
-        public ProductsController(CartContext context, ILogger<ProductsController> logger) : base(context, logger)
+        protected readonly CartContext _context;
+        protected readonly ILogger<ProductsController> _logger;
+
+        public ProductsController(CartContext context, ILogger<ProductsController> logger)
         {
+            _context = context;
+            _logger = logger;
         }
 
         // GET: api/Products
@@ -26,68 +31,54 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
-            try
+            var query = _context.Products.AsQueryable();
+            var users = await PaginationService.Paginate(query, page, pageSize);
+
+            if (users.Items.Count <= 0)
             {
-                var query = _context.Products.AsQueryable();
-                var users = await PaginationService.Paginate(query, page, pageSize);
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Products: No product found.");
 
-                if (users.Items.Count <= 0)
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Products: No product found.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "No product found.",
-                        Data = users
-                    });
-                }
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = "Ok",
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "No product found.",
                     Data = users
                 });
             }
-            catch (Exception e)
+
+            return Ok(new ApiResponseDTO
             {
-                return GenericError($"[{DateTime.Now}] GET: api/Products: An error happened: {e}");
-            }
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Ok",
+                Data = users
+            });
         }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(long id)
         {
-            try
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null)
             {
-                var product = await _context.Products.FindAsync(id);
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Products/{id}: Product not found.");
 
-                if (product == null)
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Products/{id}: Product not found.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "Product not found."
-                    });
-                }
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = "Found.",
-                    Data = product
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "Product not found."
                 });
             }
-            catch (Exception e)
+
+            return Ok(new ApiResponseDTO
             {
-                return GenericError($"[{DateTime.Now}] GET: api/Products/{id}: An error happened: {e}");
-            }
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Found.",
+                Data = product
+            });
         }
 
         // PUT: api/Products/5
@@ -95,66 +86,59 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(long id, ProductPostDTO product)
         {
+            var logMessage = "";
+
+            //if (id != product.Id)
+            //{
+            //    logMessage = "Invalid Product or Id.";
+            //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
+
+            //    return BadRequest(new
+            //    {
+            //        status = HttpStatusCode.BadRequest,
+            //        success = false,
+            //        message = logMessage,
+            //        data = product
+            //    });
+            //}
+
+            var updatedProduct = new Product
+            {
+                Id = id,
+                Name = product.Name,
+                UnitPrice = product.UnitPrice,
+                QuantityInStock = product.QuantityInStock
+            };
+
+            _context.Entry(updatedProduct).State = EntityState.Modified;
+
             try
             {
-                var logMessage = "";
-
-                //if (id != product.Id)
-                //{
-                //    logMessage = "Invalid Product or Id.";
-                //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
-
-                //    return BadRequest(new
-                //    {
-                //        status = HttpStatusCode.BadRequest,
-                //        success = false,
-                //        message = logMessage,
-                //        data = product
-                //    });
-                //}
-
-                var updatedProduct = new Product
-                {
-                    Id = id,
-                    Name = product.Name,
-                    UnitPrice = product.UnitPrice,
-                    QuantityInStock = product.QuantityInStock
-                };
-
-                _context.Entry(updatedProduct).State = EntityState.Modified;
-
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(id))
-                    {
-                        logMessage = "Product not found.";
-                        _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
-
-                        return NotFound(new ApiResponseDTO
-                        {
-                            Status = (int)HttpStatusCode.NotFound,
-                            Message = logMessage,
-                            Data = updatedProduct
-                        });
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
-
-                return NoContent();
+                await _context.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (DbUpdateConcurrencyException)
             {
-                return GenericError($"[{DateTime.Now}] PUT: api/Products/{id}: An error happened: {e}");
+                if (!ProductExists(id))
+                {
+                    logMessage = "Product not found.";
+                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
+
+                    return NotFound(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Message = logMessage,
+                        Data = updatedProduct
+                    });
+                }
+                else
+                {
+                    throw;
+                }
             }
+
+            _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
+
+            return NoContent();
         }
 
         // POST: api/Products
@@ -162,84 +146,70 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(ProductPostDTO product)
         {
-            try
+            product.Name.Trim();
+            ValidateSentProduct(product);
+
+            if (_context.Products.Any(e => product.Name == e.Name))
             {
-                product.Name.Trim();
-                ValidateSentProduct(product);
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with Name {product.Name} already exists. Cannot created new product.");
 
-                if (_context.Products.Any(e => product.Name == e.Name))
+                return Conflict(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with Name {product.Name} already exists. Cannot created new product.");
-
-                    return Conflict(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.Conflict,
-                        Message = "Product already exists."
-                    });
-                }
-
-                var newProduct = new Product
-                {
-                    Name = product.Name,
-                    UnitPrice = product.UnitPrice,
-                    QuantityInStock = product.QuantityInStock
-                };
-
-                _context.Products.Add(newProduct);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with name '{product.Name}' created successfully.");
-
-                return CreatedAtAction("GetProduct", new { id = newProduct.Id }, new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.Created,
-                    Success = true,
-                    Message = "Product created successfully.",
-                    Data = newProduct
+                    Status = (int)HttpStatusCode.Conflict,
+                    Message = "Product already exists."
                 });
             }
-            catch (Exception e)
+
+            var newProduct = new Product
             {
-                return GenericError($"[{DateTime.Now}] POST: api/Products: An error happened: {e}");
-            }
+                Name = product.Name,
+                UnitPrice = product.UnitPrice,
+                QuantityInStock = product.QuantityInStock
+            };
+
+            _context.Products.Add(newProduct);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Product with name '{product.Name}' created successfully.");
+
+            return CreatedAtAction("GetProduct", new { id = newProduct.Id }, new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.Created,
+                Success = true,
+                Message = "Product created successfully.",
+                Data = newProduct
+            });
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(long id)
         {
-            try
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
             {
-                var product = await _context.Products.FindAsync(id);
-                if (product == null)
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} does not exist. Cannot delete product.");
+
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} does not exist. Cannot delete product.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "Product not found."
-                    });
-                }
-
-                _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} deleted successfully.");
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = "Product deleted successfully."
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "Product not found."
                 });
+            }
 
-                //return NoContent();
-            }
-            catch (Exception e)
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Product with id {id} deleted successfully.");
+
+            return Ok(new ApiResponseDTO
             {
-                return GenericError($"[{DateTime.Now}] DELETE: api/Products/{id}: An error happened: {e}");
-            }
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Product deleted successfully."
+            });
+
+            //return NoContent();
         }
 
         private void ValidateSentProduct(ProductPostDTO product)

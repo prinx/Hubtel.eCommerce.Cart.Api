@@ -1,3 +1,4 @@
+using Hubtel.eCommerce.Cart.Api.Extensions;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Microsoft.EntityFrameworkCore;
@@ -6,14 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+//builder.Services.AddSingleton<IPagination<T>, typeof(PaginationService<>)>();
+builder.Services.AddSingleton<IExceptionHandlerService, ExceptionHandlerService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//builder.Services.AddSingleton<IPagination<T>, typeof(PaginationService<>)>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 builder.Services.AddDbContext<CartContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -24,12 +26,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseExceptionHandler("/error-local-development");
 }
-else
-{
-    app.UseExceptionHandler("/error");
-}
+
+// Handle exception with default handler middleware
+//var exceptionService = app.Services.GetRequiredService<IExceptionHandlerService>();
+//app.ConfigureExceptionHandler(exceptionService);
+
+// Handle global exception with custom middleware
+app.ConfigureCustomExceptionHandler();
 
 app.UseHttpsRedirection();
 

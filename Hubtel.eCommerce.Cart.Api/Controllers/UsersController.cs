@@ -15,10 +15,15 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : CustomBaseController
+    public class UsersController : ControllerBase
     {
-        public UsersController(CartContext context, ILogger<UsersController> logger) : base(context, logger)
+        protected readonly CartContext _context;
+        protected readonly ILogger<UsersController> _logger;
+
+        public UsersController(CartContext context, ILogger<UsersController> logger)
         {
+            _context = context;
+            _logger = logger;
         }
 
         // GET: api/Users
@@ -27,68 +32,54 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
-            try
+            var query = _context.Users.AsQueryable();
+            var users = await PaginationService.Paginate(query, page, pageSize);
+
+            if (users.Items.Count <= 0)
             {
-                var query = _context.Users.AsQueryable();
-                var users = await PaginationService.Paginate(query, page, pageSize);
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Users: No user found.");
 
-                if (users.Items.Count <= 0)
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Users: No user found.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "No user found.",
-                        Data = users
-                    });
-                }
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = "Ok",
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "No user found.",
                     Data = users
                 });
             }
-            catch (Exception e)
+
+            return Ok(new ApiResponseDTO
             {
-                return GenericError($"[{DateTime.Now}] GET: api/Users: An error happened: {e}");
-            }
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Ok",
+                Data = users
+            });
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(long id)
         {
-            try
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
             {
-                var user = await _context.Users.FindAsync(id);
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Users/{id}: User not found.");
 
-                if (user == null)
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] GET: api/Users/{id}: User not found.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "User not found."
-                    });
-                }
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = "Found.",
-                    Data = user
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "User not found."
                 });
             }
-            catch (Exception e)
+
+            return Ok(new ApiResponseDTO
             {
-                return GenericError($"[{DateTime.Now}] GET: api/Users/{id}: An error happened: {e}");
-            }
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Found.",
+                Data = user
+            });
         }
 
         // PUT: api/Users/5
@@ -96,64 +87,57 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(long id, UserPostDTO user)
         {
+            var logMessage = "";
+
+            //if (id != user.Id)
+            //{
+            //    logMessage = "Invalid User or Id.";
+            //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
+
+            //    return BadRequest(new ApiResponseDTO
+            //   {
+            //        Status = (int)HttpStatusCode.BadRequest,
+            //        Message = logMessage,
+            //        Data = user
+            //    });
+            //}
+
+            var updatedUser = new User
+            {
+                Id = id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber
+            };
+
+            _context.Entry(updatedUser).State = EntityState.Modified;
+
             try
             {
-                var logMessage = "";
-
-                //if (id != user.Id)
-                //{
-                //    logMessage = "Invalid User or Id.";
-                //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
-
-                //    return BadRequest(new ApiResponseDTO
-                //   {
-                //        Status = (int)HttpStatusCode.BadRequest,
-                //        Message = logMessage,
-                //        Data = user
-                //    });
-                //}
-
-                var updatedUser = new User
-                {
-                    Id = id,
-                    Name = user.Name,
-                    PhoneNumber = user.PhoneNumber
-                };
-
-                _context.Entry(updatedUser).State = EntityState.Modified;
-
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(id))
-                    {
-                        logMessage = "User not found.";
-                        _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
-                        
-                        return NotFound(new ApiResponseDTO
-                        {
-                            Status = (int)HttpStatusCode.NotFound,
-                            Message = logMessage,
-                            Data = updatedUser
-                        });
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
-
-                return NoContent();
+                await _context.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (DbUpdateConcurrencyException)
             {
-                return GenericError($"[{DateTime.Now}] PUT: api/Users/{id}: An error happened: {e}");
+                if (!UserExists(id))
+                {
+                    logMessage = "User not found.";
+                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
+                        
+                    return NotFound(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Message = logMessage,
+                        Data = updatedUser
+                    });
+                }
+                else
+                {
+                    throw;
+                }
             }
+
+            _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
+
+            return NoContent();
         }
 
         // POST: api/Users
@@ -161,85 +145,71 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(UserPostDTO user)
         {
-            try
+            user.Name.Trim();
+            user.PhoneNumber.Trim();
+
+            if (_context.Users.Any(e => e.PhoneNumber == user.PhoneNumber))
             {
-                user.Name.Trim();
-                user.PhoneNumber.Trim();
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
 
-                if (_context.Users.Any(e => e.PhoneNumber == user.PhoneNumber))
+                return Conflict(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
-
-                    return Conflict(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.Conflict,
-                        Message = "User already exists.",
-                        Data = user
-                    });
-                }
-
-                var newUser = new User
-                {
-                    Name = user.Name,
-                    PhoneNumber = user.PhoneNumber,
-                };
-
-                _context.Users.Add(newUser);
-
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
-
-                return CreatedAtAction("GetUser", new { id = newUser.Id }, new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.Created,
-                    Success = true,
-                    Message = "User created successfully.",
-                    Data = newUser
+                    Status = (int)HttpStatusCode.Conflict,
+                    Message = "User already exists.",
+                    Data = user
                 });
             }
-            catch (Exception e)
+
+            var newUser = new User
             {
-                return GenericError($"[{DateTime.Now}] POST: api/Users: An error happened: {e}");
-            }
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber,
+            };
+
+            _context.Users.Add(newUser);
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
+
+            return CreatedAtAction("GetUser", new { id = newUser.Id }, new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.Created,
+                Success = true,
+                Message = "User created successfully.",
+                Data = newUser
+            });
         }
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(long id)
         {
-            try
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
             {
-                var user = await _context.Users.FindAsync(id);
-                if (user == null)
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User does not exist. Cannot delete.");
+
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User does not exist. Cannot delete.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "User not found."
-                    });
-                }
-
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = "User deleted usccessfully."
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "User not found."
                 });
+            }
 
-                //return NoContent();
-            }
-            catch (Exception e)
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
+
+            return Ok(new ApiResponseDTO
             {
-                return GenericError($"[{DateTime.Now}] DELETE: api/Users/{id}: An error happened: {e}");
-            }
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "User deleted usccessfully."
+            });
+
+            //return NoContent();
         }
 
         private bool UserExists(long id)
