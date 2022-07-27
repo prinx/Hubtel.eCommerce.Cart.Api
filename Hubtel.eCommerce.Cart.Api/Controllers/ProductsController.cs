@@ -30,7 +30,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts(
+        public async Task<ActionResult> GetProducts(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
@@ -60,7 +60,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(long id)
+        public async Task<ActionResult> GetProduct(long id)
         {
             var product = await _productsService.GetSingleProduct(id);
 
