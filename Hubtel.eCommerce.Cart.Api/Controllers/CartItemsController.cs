@@ -13,13 +13,13 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
     [ApiController]
     public class CartItemsController : ControllerBase
     {
-        protected readonly CartContext _context;
         protected readonly ILogger<CartItemsController> _logger;
+        protected readonly ICartItemsService _cartItemsService;
 
-        public CartItemsController(CartContext context, ILogger<CartItemsController> logger)
+        public CartItemsController(ILogger<CartItemsController> logger, ICartItemsService cartItemsService)
         {
-            _context = context;
             _logger = logger;
+            _cartItemsService = cartItemsService;
         }
 
         // GET: api/CartItems
@@ -36,19 +36,8 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         {
             try
             {
-                ValidateGetAllCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to);
-
-                var query = _context.CartItems
-                    .Where(item => phoneNumber == default || (phoneNumber != default && item.User.PhoneNumber == phoneNumber))
-                    .Where(item => productId == default || (productId != default && item.ProductId == productId))
-                    .Where(item => minQuantity == default || (minQuantity != default && item.Quantity >= minQuantity))
-                    .Where(item => maxQuantity == default || (maxQuantity != default && item.Quantity <= maxQuantity))
-                    .Where(item => from == default || (from != default && item.CreatedAt >= from))
-                    .Where(item => to == default || (to != default && item.CreatedAt <= to))
-                    .Include(item => item.Product)
-                    .AsQueryable();
-
-                var pageItems = await PaginationService.Paginate(query, page, pageSize);
+                _cartItemsService.ValidateGetAllCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to);
+                var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
 
                 if (pageItems.Items.Count <= 0)
                 {
@@ -90,10 +79,8 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CartItem>> GetCartItem(long id)
         {
-            var message = "";
-            var item = await _context.CartItems
-                .Include(e => e.Product)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            string message;
+            var item = await _cartItemsService.GetSingleCartItem(id);
 
             if (item == null)
             {
@@ -122,7 +109,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/CartItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCartItem(long id, CartItemPostDTO cartItem)
+        public IActionResult PutCartItem(long id, CartItemPostDTO cartItem)
         {
             try
             {
@@ -137,16 +124,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 //    });
                 //}
 
-                var updatedCartItem = new CartItem
-                {
-                    Id = id,
-                    ProductId = cartItem.ProductId,
-                    UserId = cartItem.UserId
-                };
-
-                _context.Entry(updatedCartItem).State = EntityState.Modified;
-
-                await _context.SaveChangesAsync();
+                _cartItemsService.UpdateCartItem(id, cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item updated successfuly.");
 
@@ -154,7 +132,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CartItemExists(id))
+                if (!_cartItemsService.CartItemExists(id))
                 {
                     _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item to update not found.");
 
@@ -178,7 +156,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         {
             try
             {
-                await ValidatePostRequestBody(cartItem);
+                await _cartItemsService.ValidatePostRequestBody(cartItem);
             }
             catch (ArgumentException ex)
             {
@@ -192,11 +170,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            CartItem fullItem = await RetrieveFullCartItem(cartItem);
+            CartItem fullItem = await _cartItemsService.RetrieveFullCartItem(cartItem);
 
             if (fullItem != null)
             {
-                UpdateCartItemQuantity(fullItem, cartItem.Quantity);
+                _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
 
@@ -210,7 +188,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             else
             {
-                var newItem = await CreateCartItem(cartItem);
+                var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
 
@@ -228,7 +206,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCartItem(long id)
         {
-            var cartItem = await _context.CartItems.FindAsync(id);
+            var cartItem = await _cartItemsService.RetrieveFullCartItem(id);
 
             if (cartItem == null)
             {
@@ -241,110 +219,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            _context.CartItems.Remove(cartItem);
-            await _context.SaveChangesAsync();
+            _cartItemsService.DeleteCartItem(cartItem);
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart item deleted successfully.");
 
             return NoContent();
-        }
-
-        private void ValidateGetAllCartItemsQueryString(
-            string phoneNumber = default,
-            long productId = default,
-            int minQuantity = default,
-            int maxQuantity = default,
-            DateTime startDate = default,
-            DateTime endDate = default
-        )
-        {
-            if (phoneNumber != default && (phoneNumber.Length > 15 || phoneNumber.Length < 9))
-            {
-                throw new ArgumentException("Invalid phone number");
-            }
-
-            if (productId != default && productId <= 0)
-            {
-                throw new ArgumentException("Product id must be greater than 0");
-            }
-
-            if ((minQuantity != default && minQuantity <= 0) || (maxQuantity != default && maxQuantity <= 0))
-            {
-                throw new ArgumentException("Any specified item quantity must be greater than 0");
-            }
-
-            if (startDate != default && endDate != default && startDate > endDate)
-            {
-                throw new ArgumentException("Start date must be less than end date");
-            }
-        }
-
-        private async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
-        {
-            return await _context.CartItems
-                .Where(item => item.UserId == cartItem.UserId && item.ProductId == cartItem.ProductId)
-                .Include(item => item.Product)
-                .Include(item => item.User)
-                .FirstOrDefaultAsync();
-        }
-
-        private async void UpdateCartItemQuantity(CartItem item, int quantity)
-        {
-            _context.CartItems.Update(item);
-            item.Quantity += quantity;
-
-            if (item.Quantity < 0)
-            {
-                throw new ArgumentException("Invalid product quantity");
-            }
-
-            await _context.SaveChangesAsync();
-        }
-
-        private async Task<CartItem> CreateCartItem(CartItemPostDTO item)
-        {
-            var newItem = new CartItem
-            {
-                UserId = item.UserId,
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            };
-            _context.CartItems.Add(newItem);
-            await _context.SaveChangesAsync();
-
-            return newItem;
-        }
-
-        private async Task ValidatePostRequestBody(CartItemPostDTO cartItem)
-        {
-            if (cartItem.Quantity == 0)
-            {
-                throw new ArgumentException("Invalid product quantity.");
-            }
-
-            Product product = await _context.Products.FindAsync(cartItem.ProductId);
-
-            if (product == null)
-            {
-                throw new ArgumentException("Invalid product.");
-            }
-
-            if (cartItem.Quantity > product.QuantityInStock)
-            {
-                throw new ArgumentException("Not enough products.");
-            }
-
-            User user = await _context.Users.FindAsync(cartItem.UserId);
-
-            if (user == null)
-            {
-                throw new ArgumentException("Invalid user.");
-            }
-        }
-
-        private bool CartItemExists(long id)
-        {
-            return _context.CartItems.Any(e => e.Id == id);
         }
     }
 }

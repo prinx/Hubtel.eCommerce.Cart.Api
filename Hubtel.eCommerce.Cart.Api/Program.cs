@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //builder.Services.AddSingleton<IPagination<T>, typeof(PaginationService<>)>();
 builder.Services.AddSingleton<IExceptionHandlerService, ExceptionHandlerService>();
+builder.Services.AddSingleton<ICartItemsService, CartItemsService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
