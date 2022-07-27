@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
+using Hubtel.eCommerce.Cart.Api.Filters;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
+    [ValidationActionFilter]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase

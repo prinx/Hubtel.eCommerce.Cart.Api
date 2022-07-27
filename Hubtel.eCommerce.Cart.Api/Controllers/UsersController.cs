@@ -10,9 +10,11 @@ using Hubtel.eCommerce.Cart.Api.Models;
 
 using System.Net;
 using Hubtel.eCommerce.Cart.Api.Services;
+using Hubtel.eCommerce.Cart.Api.Filters;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
+    [ValidationActionFilter]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
