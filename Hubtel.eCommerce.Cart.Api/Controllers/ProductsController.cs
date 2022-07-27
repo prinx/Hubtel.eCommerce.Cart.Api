@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Hubtel.eCommerce.Cart.Api.Filters;
+using System.Text.RegularExpressions;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
@@ -87,29 +88,28 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult PutProduct(long id, ProductPostDTO product)
         {
-            var logMessage = "";
+            _productsService.ValidateSentProduct(product);
+
+            string logMessage;
 
             //if (id != product.Id)
             //{
             //    logMessage = "Invalid Product or Id.";
             //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
 
-            //    return BadRequest(new
+            //    return BadRequest(new ApiResponseDTO
             //    {
-            //        status = HttpStatusCode.BadRequest,
-            //        success = false,
-            //        message = logMessage,
-            //        data = product
+            //        Status = (int)HttpStatusCode.BadRequest,
+            //        Success = false,
+            //        Message = logMessage,
+            //        Data = product
             //    });
             //}
 
             try
             {
                 _productsService.UpdateProduct(id, product);
-
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
-
-                return NoContent();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -130,15 +130,18 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     throw;
                 }
             }
+
+            return NoContent();
         }
 
         // POST: api/Products
         // To protect from overposting attacks,
         // see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(ProductPostDTO product)
+        public async Task<ActionResult> PostProduct(ProductPostDTO product)
         {
             product.Name.Trim();
+
             _productsService.ValidateSentProduct(product);
 
             if (_productsService.ProductExists(product.Name))
@@ -172,6 +175,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         public async Task<IActionResult> DeleteProduct(long id)
         {
             var product = await _productsService.RetrieveProduct(id);
+
             if (product == null)
             {
                 _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: " +

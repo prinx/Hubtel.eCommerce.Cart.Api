@@ -21,7 +21,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public bool UserExists(long id);
 
-        public bool UserExists(string name);
+        public bool UserExists(string phoneNumber);
     }
 }
 

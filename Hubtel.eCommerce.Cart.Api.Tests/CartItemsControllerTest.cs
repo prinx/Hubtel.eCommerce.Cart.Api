@@ -1,4 +1,5 @@
 ﻿using Hubtel.eCommerce.Cart.Api.Controllers;
+using Hubtel.eCommerce.Cart.Api.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -24,11 +25,13 @@ namespace Hubtel.eCommerce.Cart.Api.Tests
         public async void GetCartItems_Should_Return_OK()
         {
             using var context = Fixture.CreateContext();
+            var service = new CartItemsService(context);
+
             var mock = new Mock<ILogger<CartItemsController>>();
             ILogger<CartItemsController>  _logger = mock.Object;
             //_logger = Mock.Of<ILogger>();
 
-            var controller = new CartItemsController(context, _logger);
+            var controller = new CartItemsController(_logger, service);
 
             var cartItems = await controller.GetCartItems();
 

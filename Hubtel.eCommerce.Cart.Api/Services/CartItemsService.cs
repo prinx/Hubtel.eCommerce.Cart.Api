@@ -15,7 +15,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         }
 
         public void ValidateGetAllCartItemsQueryString(
-            string? phoneNumber = default,
+            string phoneNumber = default,
             long productId = default,
             int minQuantity = default,
             int maxQuantity = default,
@@ -45,7 +45,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         }
 
         public async Task<Pagination<CartItem>> GetCartItems(
-            string? phoneNumber = default,
+            string phoneNumber = default,
             long productId = default,
             int minQuantity = default,
             int maxQuantity = default,
