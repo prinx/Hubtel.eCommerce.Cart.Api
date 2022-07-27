@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IExceptionHandlerService, ExceptionHandlerService>();
 builder.Services.AddSingleton<ICartItemsService, CartItemsService>();
 builder.Services.AddSingleton<IProductsService, ProductsService>();
+builder.Services.AddSingleton<IUsersService, UsersService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

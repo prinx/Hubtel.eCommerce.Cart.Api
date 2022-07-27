@@ -19,12 +19,12 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        protected readonly CartContext _context;
+        protected readonly IUsersService _usersService;
         protected readonly ILogger<UsersController> _logger;
 
-        public UsersController(CartContext context, ILogger<UsersController> logger)
+        public UsersController(IUsersService usersService, ILogger<UsersController> logger)
         {
-            _context = context;
+            _usersService = usersService;
             _logger = logger;
         }
 
@@ -34,8 +34,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
-            var query = _context.Users.AsQueryable();
-            var users = await PaginationService.Paginate(query, page, pageSize);
+            var users = await _usersService.GetUsers(page, pageSize);
 
             if (users.Items.Count <= 0)
             {
@@ -62,7 +61,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(long id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _usersService.GetSingleUser(id);
 
             if (user == null)
             {
@@ -87,9 +86,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(long id, UserPostDTO user)
+        public IActionResult PutUser(long id, UserPostDTO user)
         {
-            var logMessage = "";
+            _usersService.ValidateSentUser(user);
+
+            string logMessage;
 
             //if (id != user.Id)
             //{
@@ -104,22 +105,14 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             //    });
             //}
 
-            var updatedUser = new User
-            {
-                Id = id,
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber
-            };
-
-            _context.Entry(updatedUser).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                _usersService.UpdateUser(id, user);
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!_usersService.UserExists(id))
                 {
                     logMessage = "User not found.";
                     _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
@@ -128,7 +121,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     {
                         Status = (int)HttpStatusCode.NotFound,
                         Message = logMessage,
-                        Data = updatedUser
+                        Data = user
                     });
                 }
                 else
@@ -137,22 +130,23 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 }
             }
 
-            _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
-
             return NoContent();
         }
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(UserPostDTO user)
+        public ActionResult PostUser(UserPostDTO user)
         {
             user.Name.Trim();
             user.PhoneNumber.Trim();
 
-            if (_context.Users.Any(e => e.PhoneNumber == user.PhoneNumber))
+            _usersService.ValidateSentUser(user);
+
+            if (_usersService.UserExists(user.PhoneNumber))
             {
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} already exists.");
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: " +
+                    $"User with phone number {user.PhoneNumber} already exists.");
 
                 return Conflict(new ApiResponseDTO
                 {
@@ -162,15 +156,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            var newUser = new User
-            {
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-            };
-
-            _context.Users.Add(newUser);
-
-            await _context.SaveChangesAsync();
+            var newUser = _usersService.CreateUser(user);
 
             _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
 
@@ -187,7 +173,8 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(long id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _usersService.RetrieveUser(id);
+
             if (user == null)
             {
                 _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User does not exist. Cannot delete.");
@@ -199,8 +186,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            _usersService.DeleteUser(user);
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 
@@ -212,11 +198,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             });
 
             //return NoContent();
-        }
-
-        private bool UserExists(long id)
-        {
-            return _context.Users.Any(e => e.Id == id);
         }
     }
 }
