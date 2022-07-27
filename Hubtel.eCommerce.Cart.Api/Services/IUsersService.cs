@@ -3,8 +3,10 @@ using Hubtel.eCommerce.Cart.Api.Models;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
-    public interface IUsersService
+    public interface IUsersService : IControllerService
     {
+        public void ValidateGetUsersQueryString(int page, int pageSize);
+
         public Task<Pagination<User>> GetUsers(int page, int pageSize);
 
         public Task<User> GetSingleUser(long id);

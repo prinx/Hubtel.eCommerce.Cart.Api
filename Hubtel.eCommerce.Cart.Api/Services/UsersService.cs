@@ -5,13 +5,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
-    public class UsersService : IUsersService
+    public class UsersService : ControllerService, IUsersService
     {
         protected readonly CartContext _context;
 
         public UsersService(CartContext context)
         {
             _context = context;
+        }
+
+        public void ValidateGetUsersQueryString(int page = default, int pageSize = default)
+        {
+            ValidatePaginationQueryString(page, pageSize);
         }
 
         public async Task<Pagination<User>> GetUsers(int page, int pageSize)

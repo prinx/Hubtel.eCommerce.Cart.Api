@@ -34,6 +34,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
+            _productsService.ValidateGetProductsQueryString(page, pageSize);
             var users = await _productsService.GetProducts(page, pageSize);
 
             if (users.Items.Count <= 0)

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
-    public class ProductsService : IProductsService
+    public class ProductsService : ControllerService, IProductsService
     {
         protected readonly CartContext _context;
 
@@ -13,6 +13,11 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         public ProductsService(CartContext context)
         {
             _context = context;
+        }
+
+        public void ValidateGetProductsQueryString(int page = default, int pageSize = default)
+        {
+            ValidatePaginationQueryString(page, pageSize);
         }
 
         public async Task<Pagination<Product>> GetProducts(int page, int pageSize)

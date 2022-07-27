@@ -13,10 +13,10 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
     [ApiController]
     public class CartItemsController : ControllerBase
     {
-        protected readonly ILogger<CartItemsController> _logger;
         protected readonly ICartItemsService _cartItemsService;
+        protected readonly ILogger<CartItemsController> _logger;
 
-        public CartItemsController(ILogger<CartItemsController> logger, ICartItemsService cartItemsService)
+        public CartItemsController(ICartItemsService cartItemsService, ILogger<CartItemsController> logger)
         {
             _logger = logger;
             _cartItemsService = cartItemsService;
@@ -24,7 +24,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/CartItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CartItem>>> GetCartItems(
+        public async Task<ActionResult> GetCartItems(
             [FromQuery] string phoneNumber = default,
             [FromQuery] long productId = default,
             [FromQuery] int minQuantity = default,
@@ -36,7 +36,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         {
             try
             {
-                _cartItemsService.ValidateGetAllCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to);
+                _cartItemsService.ValidateGetCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
                 var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
 
                 if (pageItems.Items.Count <= 0)
@@ -77,7 +77,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/CartItems/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CartItem>> GetCartItem(long id)
+        public async Task<ActionResult> GetCartItem(long id)
         {
             string message;
             var item = await _cartItemsService.GetSingleCartItem(id);
@@ -109,8 +109,10 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/CartItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public IActionResult PutCartItem(long id, CartItemPostDTO cartItem)
+        public async Task<IActionResult> PutCartItem(long id, CartItemPostDTO cartItem)
         {
+            await _cartItemsService.ValidatePostRequestBody(cartItem);
+
             try
             {
                 //if (id != cartItem.Id)
@@ -152,7 +154,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // POST: api/CartItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CartItem>> PostCartItem(CartItemPostDTO cartItem)
+        public async Task<ActionResult> PostCartItem(CartItemPostDTO cartItem)
         {
             try
             {
@@ -174,6 +176,16 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             if (fullItem != null)
             {
+                if (_cartItemsService.QuantityFarLessThanCurrentCartItemQuantity(cartItem, fullItem))
+                {
+                    return BadRequest(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.BadRequest,
+                        Message = "Invalid quantity",
+                        Data = cartItem
+                    });
+                }
+
                 _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
@@ -188,6 +200,16 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             else
             {
+                if (_cartItemsService.QuantityNegativeOnCreation(cartItem))
+                {
+                    return BadRequest(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.BadRequest,
+                        Message = "Invalid quantity",
+                        Data = cartItem
+                    });
+                }
+
                 var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");

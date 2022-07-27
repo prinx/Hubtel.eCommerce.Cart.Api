@@ -27,8 +27,24 @@ namespace Hubtel.eCommerce.Cart.Api.Tests
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
 
-                        context.AddRange();
-                        
+                        context.AddRange(
+                            new Product { Name = "Watch", UnitPrice = 50, QuantityInStock = 5 },
+                            new Product { Name = "TV", UnitPrice = 2000, QuantityInStock = 7 },
+                            new Product { Name = "Keyboard", UnitPrice = 1000, QuantityInStock = 12 }
+                        );
+
+                        context.AddRange(
+                            new User { Name = "Nuna", PhoneNumber = "+233000000000" },
+                            new User { Name = "Nuna", PhoneNumber = "+233000000001" },
+                            new User { Name = "Nuna", PhoneNumber = "+233000000002" }
+                        );
+
+                        context.AddRange(
+                            new CartItem { ProductId = 1, Quantity = 2, UserId = 3 },
+                            new CartItem { ProductId = 2, Quantity = 3, UserId = 1 },
+                            new CartItem { ProductId = 3, Quantity = 4, UserId = 2 }
+                        );
+
                         context.SaveChanges();
                     }
 
@@ -38,9 +54,15 @@ namespace Hubtel.eCommerce.Cart.Api.Tests
         }
 
         public CartContext CreateContext()
-            => new CartContext(
+        {
+            var context = new CartContext(
                 new DbContextOptionsBuilder<CartContext>()
                     .UseNpgsql(ConnectionString)
                     .Options);
+
+            context.Database.BeginTransaction();
+
+            return context;
+        }
     }
 }

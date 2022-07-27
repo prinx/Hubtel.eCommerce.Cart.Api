@@ -3,8 +3,10 @@ using Hubtel.eCommerce.Cart.Api.Models;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
-    public interface IProductsService
+    public interface IProductsService : IControllerService
     {
+        public void ValidateGetProductsQueryString(int page = default, int pageSize = default);
+
         public Task<Pagination<Product>> GetProducts(int page, int pageSize);
 
         public Task<Product> GetSingleProduct(long id);

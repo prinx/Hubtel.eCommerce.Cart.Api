@@ -3,15 +3,17 @@ using Hubtel.eCommerce.Cart.Api.Models;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
-    public interface ICartItemsService
+    public interface ICartItemsService : IControllerService
     {
-        public void ValidateGetAllCartItemsQueryString(
+        public void ValidateGetCartItemsQueryString(
             string? phoneNumber = default,
             long productId = default,
             int minQuantity = default,
             int maxQuantity = default,
             DateTime startDate = default,
-            DateTime endDate = default
+            DateTime endDate = default,
+            int page = default,
+            int pageSize = default
         );
 
         public Task<Pagination<CartItem>> GetCartItems(
@@ -32,6 +34,10 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         public Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem);
 
         public Task<CartItem> RetrieveFullCartItem(long id);
+
+        public bool QuantityFarLessThanCurrentCartItemQuantity(CartItemPostDTO cartItem, CartItem fullItem);
+
+        public bool QuantityNegativeOnCreation(CartItemPostDTO cartItem);
 
         public void DeleteCartItem(CartItem cartItem);
 

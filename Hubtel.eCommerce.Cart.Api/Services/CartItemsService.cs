@@ -5,7 +5,7 @@ using Hubtel.eCommerce.Cart.Api.Models;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
-    public class CartItemsService : ICartItemsService
+    public class CartItemsService : ControllerService, ICartItemsService
     {
         protected readonly CartContext _context;
 
@@ -14,13 +14,15 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             _context = context;
         }
 
-        public void ValidateGetAllCartItemsQueryString(
+        public void ValidateGetCartItemsQueryString(
             string phoneNumber = default,
             long productId = default,
             int minQuantity = default,
             int maxQuantity = default,
             DateTime startDate = default,
-            DateTime endDate = default
+            DateTime endDate = default,
+            int page = default,
+            int pageSize = default
         )
         {
             if (phoneNumber != default && (phoneNumber.Length > 15 || phoneNumber.Length < 9))
@@ -42,6 +44,8 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             {
                 throw new ArgumentException("Start date must be less than end date");
             }
+
+            ValidatePaginationQueryString(page, pageSize);
         }
 
         public async Task<Pagination<CartItem>> GetCartItems(
@@ -100,6 +104,16 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         public async Task<CartItem> RetrieveFullCartItem(long id)
         {
             return await _context.CartItems.FindAsync(id);
+        }
+
+        public bool QuantityFarLessThanCurrentCartItemQuantity(CartItemPostDTO cartItem, CartItem fullItem)
+        {
+            return cartItem.Quantity < 0 && fullItem.Quantity < (-1 * cartItem.Quantity);
+        }
+
+        public bool QuantityNegativeOnCreation(CartItemPostDTO cartItem)
+        {
+            return cartItem.Quantity <= 0;
         }
 
         public async void DeleteCartItem(CartItem cartItem)

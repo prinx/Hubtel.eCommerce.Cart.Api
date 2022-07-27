@@ -30,10 +30,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers(
+        public async Task<ActionResult> GetUsers(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
+            _usersService.ValidateGetUsersQueryString(page, pageSize);
             var users = await _usersService.GetUsers(page, pageSize);
 
             if (users.Items.Count <= 0)
@@ -59,7 +60,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(long id)
+        public async Task<ActionResult> GetUser(long id)
         {
             var user = await _usersService.GetSingleUser(id);
 
