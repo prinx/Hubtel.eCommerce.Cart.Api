@@ -30,30 +30,30 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.CartItems
         //    Assert.IsType<OkObjectResult>(result);
         //}
 
-        [Fact]
-        public async void GetCartItems_WhenNoItemInTable_ShouldReturnNotFoundResult()
-        {
-            // Arrange
-            using var context = Fixture.CreateContext();
+        //[Fact]
+        //public async void GetCartItems_WhenNoItemInTable_ShouldReturnNotFoundResult()
+        //{
+        //    // Arrange
+        //    using var context = Fixture.CreateContext();
 
-            var service = new CartItemsService(context);
-            var logger = GetLogger<CartItemsController>();
+        //    var service = new CartItemsService(context);
+        //    var logger = GetLogger<CartItemsController>();
 
-            // Act
-            var controller = new CartItemsController(service, logger);
-            var okResult = await controller.GetCartItems() as OkObjectResult;
-            var apiResponse = okResult.Value as ApiResponseDTO;
-            var paginationObject = apiResponse.Data as Pagination<CartItem>;
-            var items = paginationObject.Items;
+        //    // Act
+        //    var controller = new CartItemsController(service, logger);
+        //    var okResult = await controller.GetCartItems() as OkObjectResult;
+        //    var apiResponse = okResult.Value as ApiResponseDTO;
+        //    var paginationObject = apiResponse.Data as Pagination<CartItem>;
+        //    var items = paginationObject.Items;
 
-            context.CartItems.RemoveRange(items);
-            context.SaveChanges();
+        //    context.CartItems.RemoveRange(items);
+        //    context.SaveChanges();
 
-            var result = await controller.GetCartItems() as NotFoundObjectResult;
+        //    var result = await controller.GetCartItems() as NotFoundObjectResult;
 
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result);
-        }
+        //    // Assert
+        //    Assert.IsType<NotFoundObjectResult>(result);
+        //}
 
         [Fact]
         public async void GetCartItems_InvalidPhoneNumber_ShouldThrowInvalidRequestInputException()

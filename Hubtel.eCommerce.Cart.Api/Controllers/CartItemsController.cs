@@ -100,43 +100,34 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         public async Task<IActionResult> PutCartItem(long id, CartItemPostDTO cartItem)
         {
             await _cartItemsService.ValidatePostRequestBody(cartItem);
-            
-            try
+
+            //if (id != cartItem.Id)
+            //{
+            //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Id and cart item to update mismatch.");
+
+            //    return BadRequest(new ApiResponseDTO
+            //    {
+            //        Status = (int)HttpStatusCode.BadRequest,
+            //        Message = "Id and cart item to update mismatch."
+            //    });
+            //}
+
+            if (!_cartItemsService.CartItemExists(id))
             {
-                //if (id != cartItem.Id)
-                //{
-                //    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Id and cart item to update mismatch.");
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item to update not found.");
 
-                //    return BadRequest(new ApiResponseDTO
-                //    {
-                //        Status = (int)HttpStatusCode.BadRequest,
-                //        Message = "Id and cart item to update mismatch."
-                //    });
-                //}
-
-                await _cartItemsService.UpdateCartItem(id, cartItem);
-
-                _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item updated successfuly.");
-
-                return NoContent();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_cartItemsService.CartItemExists(id))
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item to update not found.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "Cart item to update not found."
-                    });
-                }
-                else
-                {
-                    throw;
-                }
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "Cart item to update not found."
+                });
             }
+
+            await _cartItemsService.UpdateCartItem(id, cartItem);
+
+            _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item updated successfuly.");
+
+            return NoContent();
         }
 
         // POST: api/CartItems

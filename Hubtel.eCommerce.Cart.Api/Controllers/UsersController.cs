@@ -1,13 +1,6 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
-
 using System.Net;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Hubtel.eCommerce.Cart.Api.Filters;
@@ -106,30 +99,22 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             //    });
             //}
 
-            try
+            if (!_usersService.UserExists(id))
             {
-                await _usersService.UpdateUser(id, user);
-                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_usersService.UserExists(id))
+                logMessage = "User not found.";
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
+
+                return NotFound(new ApiResponseDTO
                 {
-                    logMessage = "User not found.";
-                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: {logMessage}");
-                        
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = logMessage,
-                        Data = user
-                    });
-                }
-                else
-                {
-                    throw;
-                }
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = logMessage,
+                    Data = user
+                });
             }
+
+            await _usersService.UpdateUser(id, user);
+
+            _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
 
             return NoContent();
         }
@@ -191,14 +176,14 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 
-            return Ok(new ApiResponseDTO
-            {
-                Status = (int)HttpStatusCode.OK,
-                Success = true,
-                Message = "User deleted usccessfully."
-            });
+            //return Ok(new ApiResponseDTO
+            //{
+            //    Status = (int)HttpStatusCode.OK,
+            //    Success = true,
+            //    Message = "User deleted usccessfully."
+            //});
 
-            //return NoContent();
+            return NoContent();
         }
     }
 }

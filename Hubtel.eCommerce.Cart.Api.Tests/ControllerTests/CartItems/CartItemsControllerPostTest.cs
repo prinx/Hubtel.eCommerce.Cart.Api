@@ -38,29 +38,29 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.CartItems
             Assert.IsType<CreatedAtActionResult>(result);
         }
 
-        [Fact]
-        public async void PostCartItem_ExistingItemInCart_ShouldReturnCreatedAtActionResult()
-        {
-            // Arrange
-            using var context = Fixture.CreateContext();
+        //[Fact]
+        //public async void PostCartItem_ExistingItemInCart_ShouldReturnCreatedAtActionResult()
+        //{
+        //    // Arrange
+        //    using var context = Fixture.CreateContext();
 
-            var service = new CartItemsService(context);
-            var logger = GetLogger<CartItemsController>();
+        //    var service = new CartItemsService(context);
+        //    var logger = GetLogger<CartItemsController>();
 
-            // Act
-            var controller = new CartItemsController(service, logger);
-            var cartItem = new CartItemPostDTO {
-                ProductId = 1,
-                Quantity = 4,
-                UserId = 3
-            };
-            var result = await controller.PostCartItem(cartItem) as CreatedAtActionResult;
+        //    // Act
+        //    var controller = new CartItemsController(service, logger);
+        //    var cartItem = new CartItemPostDTO {
+        //        ProductId = 1,
+        //        Quantity = 4,
+        //        UserId = 3
+        //    };
+        //    var result = await controller.PostCartItem(cartItem) as CreatedAtActionResult;
 
-            context.ChangeTracker.Clear();
+        //    context.ChangeTracker.Clear();
 
-            // Assert
-            Assert.IsType<CreatedAtActionResult>(result);
-        }
+        //    // Assert
+        //    Assert.IsType<CreatedAtActionResult>(result);
+        //}
 
         [Fact]
         public async void PostCartItem_ZeroQuantity_ShouldThrowInvalidRequestInputException()

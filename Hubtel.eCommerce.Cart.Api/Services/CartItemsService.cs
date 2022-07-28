@@ -59,15 +59,54 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             int page = default,
             int pageSize = default)
         {
-            var query = _context.CartItems
-                    .Where(item => phoneNumber == default || (phoneNumber != default && item.User.PhoneNumber == phoneNumber))
-                    .Where(item => productId == default || (productId != default && item.ProductId == productId))
-                    .Where(item => minQuantity == default || (minQuantity != default && item.Quantity >= minQuantity))
-                    .Where(item => maxQuantity == default || (maxQuantity != default && item.Quantity <= maxQuantity))
-                    .Where(item => startDate == default || (startDate != default && item.CreatedAt >= startDate))
-                    .Where(item => endDate == default || (endDate != default && item.CreatedAt <= endDate))
-                    .Include(item => item.Product)
-                    .AsQueryable();
+            var items = _context.CartItems;
+
+            if (phoneNumber != default)
+            {
+                items.Where(e => e.User.PhoneNumber == phoneNumber);
+            }
+
+            if (productId != default)
+            {
+                items.Where(e => e.User.PhoneNumber == phoneNumber);
+            }
+
+            if (productId != default)
+            {
+                items.Where(e => e.ProductId == productId);
+            }
+
+            if (minQuantity != default)
+            {
+                items.Where(e => e.Quantity >= minQuantity);
+            }
+
+            if (maxQuantity != default)
+            {
+                items.Where(e => e.Quantity <= maxQuantity);
+            }
+
+            if (startDate != default)
+            {
+                items.Where(e => e.Quantity <= maxQuantity);
+            }
+
+            if (startDate != default)
+            {
+                items.Where(e => e.CreatedAt >= startDate);
+            }
+
+            if (endDate != default)
+            {
+                items.Where(e => e.CreatedAt <= endDate);
+            }
+
+            if (endDate != default)
+            {
+                items.Include(item => item.Product);
+            }
+
+            var query = items.AsQueryable();
 
             return await PaginationService.Paginate(query, page, pageSize);
         }

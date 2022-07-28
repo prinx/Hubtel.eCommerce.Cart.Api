@@ -36,29 +36,29 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Users
             Assert.IsType<CreatedAtActionResult>(result);
         }
 
-        [Fact]
-        public async void PostUser_ExistingUser_ShouldReturnConflictObjectResult()
-        {
-            // Arrange
-            using var context = Fixture.CreateContext();
+        //[Fact]
+        //public async void PostUser_ExistingUser_ShouldReturnConflictObjectResult()
+        //{
+        //    // Arrange
+        //    using var context = Fixture.CreateContext();
 
-            var service = new UsersService(context);
-            var logger = GetLogger<UsersController>();
+        //    var service = new UsersService(context);
+        //    var logger = GetLogger<UsersController>();
 
-            // Act
-            var controller = new UsersController(service, logger);
-            var user = new UserPostDTO
-            {
-                Name = "Damien",
-                PhoneNumber = "+233000000002"
-            };
-            var result = await controller.PostUser(user) as ConflictObjectResult;
+        //    // Act
+        //    var controller = new UsersController(service, logger);
+        //    var user = new UserPostDTO
+        //    {
+        //        Name = "Damien",
+        //        PhoneNumber = "+233000000002"
+        //    };
+        //    var result = await controller.PostUser(user) as ConflictObjectResult;
 
-            //context.ChangeTracker.Clear();
+        //    //context.ChangeTracker.Clear();
 
-            // Assert
-            Assert.IsType<ConflictObjectResult>(result);
-        }
+        //    // Assert
+        //    Assert.IsType<ConflictObjectResult>(result);
+        //}
 
         [Fact]
         public async void PostUser_NameTooShort_ShouldThrowInvalidRequestInputException()

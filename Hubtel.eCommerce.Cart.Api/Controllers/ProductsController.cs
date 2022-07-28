@@ -107,30 +107,22 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             //    });
             //}
 
-            try
+            if (!_productsService.ProductExists(id))
             {
-                await _productsService.UpdateProduct(id, product);
-                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_productsService.ProductExists(id))
-                {
-                    logMessage = "Product not found.";
-                    _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
+                logMessage = "Product not found.";
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: {logMessage}");
 
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = logMessage,
-                        Data = product
-                    });
-                }
-                else
+                return NotFound(new ApiResponseDTO
                 {
-                    throw;
-                }
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = logMessage,
+                    Data = product
+                });
             }
+
+            await _productsService.UpdateProduct(id, product);
+
+            _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
 
             return NoContent();
         }
