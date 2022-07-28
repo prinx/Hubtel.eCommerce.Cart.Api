@@ -63,7 +63,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Users.FindAsync(id);
         }
 
-        public async void DeleteUser(User user)
+        public async Task DeleteUser(User user)
         {
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();

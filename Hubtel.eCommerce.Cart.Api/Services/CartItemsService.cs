@@ -79,7 +79,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async void UpdateCartItem(long id, CartItemPostDTO cartItem)
+        public async Task UpdateCartItem(long id, CartItemPostDTO cartItem)
         {
             var updatedCartItem = new CartItem
             {
@@ -99,7 +99,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.CartItems
                 .Where(item => item.UserId == cartItem.UserId && item.ProductId == cartItem.ProductId)
                 .Include(item => item.Product)
-                .Include(item => item.User)
+
                 .FirstOrDefaultAsync();
         }
 
@@ -118,13 +118,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return cartItem.Quantity <= 0;
         }
 
-        public async void DeleteCartItem(CartItem cartItem)
+        public async Task DeleteCartItem(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
             await _context.SaveChangesAsync();
         }
 
-        public async void UpdateCartItemQuantity(CartItem item, int quantity)
+        public async Task UpdateCartItemQuantity(CartItem item, int quantity)
         {
             _context.CartItems.Update(item);
             item.Quantity = quantity;

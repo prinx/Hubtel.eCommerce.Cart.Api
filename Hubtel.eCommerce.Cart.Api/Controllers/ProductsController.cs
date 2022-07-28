@@ -189,7 +189,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            _productsService.DeleteProduct(product);
+            await _productsService.DeleteProduct(product);
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: " +
                 $"Product with id {id} deleted successfully.");

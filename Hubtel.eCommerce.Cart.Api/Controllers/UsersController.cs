@@ -187,7 +187,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            _usersService.DeleteUser(user);
+            await _usersService.DeleteUser(user);
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 

@@ -17,7 +17,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public Task<User> RetrieveUser(long id);
 
-        public void DeleteUser(User user);
+        public Task DeleteUser(User user);
 
         public void ValidateSentUser(UserPostDTO user);
 

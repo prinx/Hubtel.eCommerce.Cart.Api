@@ -114,7 +114,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 //    });
                 //}
 
-                _cartItemsService.UpdateCartItem(id, cartItem);
+                await _cartItemsService.UpdateCartItem(id, cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item updated successfuly.");
 
@@ -150,9 +150,10 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             if (fullItem != null)
             {
-                _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
+                await _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
+                fullItem.User = null;
 
                 return CreatedAtAction(nameof(GetCartItem), new { id = fullItem.Id }, new ApiResponseDTO
                 {
@@ -167,6 +168,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
+                newItem.User = null;
 
                 return CreatedAtAction(nameof(GetCartItem), new { id = newItem.Id }, new ApiResponseDTO
                 {
@@ -195,7 +197,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            _cartItemsService.DeleteCartItem(cartItem);
+            await _cartItemsService.DeleteCartItem(cartItem);
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart item deleted successfully.");
 
