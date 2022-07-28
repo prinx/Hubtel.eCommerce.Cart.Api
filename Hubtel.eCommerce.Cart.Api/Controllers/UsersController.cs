@@ -87,7 +87,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public IActionResult PutUser(long id, UserPostDTO user)
+        public async Task<IActionResult> PutUser(long id, UserPostDTO user)
         {
             _usersService.ValidateSentUser(user);
 
@@ -108,7 +108,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             try
             {
-                _usersService.UpdateUser(id, user);
+                await _usersService.UpdateUser(id, user);
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
             }
             catch (DbUpdateConcurrencyException)
@@ -137,7 +137,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public ActionResult PostUser(UserPostDTO user)
+        public async Task<ActionResult> PostUser(UserPostDTO user)
         {
             user.Name.Trim();
             user.PhoneNumber.Trim();
@@ -157,7 +157,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            var newUser = _usersService.CreateUser(user);
+            var newUser = await _usersService.CreateUser(user);
 
             _logger.LogInformation($"[{DateTime.Now}] POST: api/Users: User with phone number {user.PhoneNumber} created successfully.");
 

@@ -34,45 +34,33 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 3)
         {
-            try
+            _cartItemsService.ValidateGetCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
+
+            var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
+
+            if (pageItems.Items.Count <= 0)
             {
-                _cartItemsService.ValidateGetCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
-                var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
 
-                if (pageItems.Items.Count <= 0)
+                return NotFound(new ApiResponseDTO
                 {
-                    _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
-
-                    return NotFound(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.NotFound,
-                        Message = "No cart item found.",
-                        Data = pageItems
-                    });
-                }
-
-                var message = $"{pageItems.Items.Count} cart item(s) Found.";
-                
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: {message}");
-
-                return Ok(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.OK,
-                    Success = true,
-                    Message = message,
+                    Status = (int)HttpStatusCode.NotFound,
+                    Message = "No cart item found.",
                     Data = pageItems
                 });
             }
-            catch (ArgumentException e)
-            {
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: {e.Message}");
 
-                return BadRequest(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.BadRequest,
-                    Message = e.Message
-                });
-            }
+            var message = $"{pageItems.Items.Count} cart item(s) Found.";
+                
+            _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: {message}");
+
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = message,
+                Data = pageItems
+            });
         }
 
         // GET: api/CartItems/5
@@ -112,7 +100,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         public async Task<IActionResult> PutCartItem(long id, CartItemPostDTO cartItem)
         {
             await _cartItemsService.ValidatePostRequestBody(cartItem);
-
+            
             try
             {
                 //if (id != cartItem.Id)
@@ -156,36 +144,12 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> PostCartItem(CartItemPostDTO cartItem)
         {
-            try
-            {
-                await _cartItemsService.ValidatePostRequestBody(cartItem);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: {ex.Message}");
-
-                return BadRequest(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.BadRequest,
-                    Message = ex.Message,
-                    Data = cartItem
-                });
-            }
+            await _cartItemsService.ValidatePostRequestBody(cartItem);
 
             CartItem fullItem = await _cartItemsService.RetrieveFullCartItem(cartItem);
 
             if (fullItem != null)
             {
-                if (_cartItemsService.QuantityFarLessThanCurrentCartItemQuantity(cartItem, fullItem))
-                {
-                    return BadRequest(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.BadRequest,
-                        Message = "Invalid quantity",
-                        Data = cartItem
-                    });
-                }
-
                 _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
@@ -200,16 +164,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
             else
             {
-                if (_cartItemsService.QuantityNegativeOnCreation(cartItem))
-                {
-                    return BadRequest(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.BadRequest,
-                        Message = "Invalid quantity",
-                        Data = cartItem
-                    });
-                }
-
                 var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");

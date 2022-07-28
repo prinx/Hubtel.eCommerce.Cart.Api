@@ -1,43 +1,41 @@
-﻿using System;
-using Hubtel.eCommerce.Cart.Api.Controllers;
+﻿using Hubtel.eCommerce.Cart.Api.Controllers;
+using Hubtel.eCommerce.Cart.Api.Exceptions;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
 {
-    public class ProductsControllerPostTest : CartTest
+    public class ProductsControllerPostTest : CartTest, IClassFixture<TestDatabaseFixture>
     {
         public ProductsControllerPostTest(TestDatabaseFixture fixture) : base(fixture)
         {
         }
 
-        [Fact]
-        public async void PostProduct_NewItem_ShouldReturnCreatedAtActionResult()
-        {
-            // Arrange
-            using var context = Fixture.CreateContext();
+        //[Fact]
+        //public async void PostProduct_NewItem_ShouldReturnCreatedAtActionResult()
+        //{
+        //    // Arrange
+        //    using var context = Fixture.CreateContext();
 
-            var service = new ProductsService(context);
-            var logger = GetLogger<ProductsController>();
+        //    var service = new ProductsService(context);
+        //    var logger = GetLogger<ProductsController>();
 
-            // Act
-            var controller = new ProductsController(service, logger);
-            var product = new ProductPostDTO
-            {
-                Name = "Car",
-                QuantityInStock = 36,
-                UnitPrice = 20000
-            };
-            var result = await controller.PostProduct(product) as CreatedAtActionResult;
+        //    // Act
+        //    var controller = new ProductsController(service, logger);
+        //    var product = new ProductPostDTO
+        //    {
+        //        Name = "Car",
+        //        QuantityInStock = 36,
+        //        UnitPrice = 20000
+        //    };
+        //    var result = await controller.PostProduct(product) as CreatedAtActionResult;
 
-            context.ChangeTracker.Clear();
+        //    //context.ChangeTracker.Clear();
 
-            // Assert
-            Assert.IsType<CreatedAtActionResult>(result);
-        }
+        //    // Assert
+        //    Assert.IsType<CreatedAtActionResult>(result);
+        //}
 
         [Fact]
         public async void PostProduct_ExistingProduct_ShouldReturnConflictObjectResult()
@@ -58,14 +56,14 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
             };
             var result = await controller.PostProduct(product) as ConflictObjectResult;
 
-            context.ChangeTracker.Clear();
+            //context.ChangeTracker.Clear();
 
             // Assert
             Assert.IsType<ConflictObjectResult>(result);
         }
 
         [Fact]
-        public async void PostProduct_NameTooShort_ShouldReturnBadRequestResult()
+        public async void PostProduct_NameTooShort_ShouldThrowInvalidRequestInputException()
         {
             // Arrange
             using var context = Fixture.CreateContext();
@@ -81,16 +79,18 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
                 QuantityInStock = 36,
                 UnitPrice = 20000
             };
-            var result = await controller.PostProduct(product) as BadRequestResult;
 
-            context.ChangeTracker.Clear();
+            //var result = await controller.PostProduct(product) as BadRequestResult;
+
+            //context.ChangeTracker.Clear();
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            //Assert.IsType<BadRequestResult>(result);
+            await Assert.ThrowsAsync<InvalidRequestInputException>(async () => await controller.PostProduct(product));
         }
 
         [Fact]
-        public async void PostProduct_NameTooLong_ShouldReturnBadRequestResult()
+        public async void PostProduct_NameTooLong_ShouldThrowInvalidRequestInputException()
         {
             // Arrange
             using var context = Fixture.CreateContext();
@@ -102,20 +102,21 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
             var controller = new ProductsController(service, logger);
             var product = new ProductPostDTO
             {
-                Name = "Car".PadLeft(50),
+                Name = "CarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCarCar",
                 QuantityInStock = 36,
                 UnitPrice = 20000
             };
-            var result = await controller.PostProduct(product) as BadRequestResult;
+            //var result = await controller.PostProduct(product) as BadRequestResult;
 
-            context.ChangeTracker.Clear();
+            //context.ChangeTracker.Clear();
 
-            // Assert
-            Assert.IsType<BadRequestResult>(result);
+            //// Assert
+            //Assert.IsType<BadRequestResult>(result);
+            await Assert.ThrowsAsync<InvalidRequestInputException>(async () => await controller.PostProduct(product));
         }
 
         [Fact]
-        public async void PostProduct_UnitPriceNegative_ShouldReturnBadRequestResult()
+        public async void PostProduct_UnitPriceNegative_ShouldThrowInvalidRequestInputException()
         {
             // Arrange
             using var context = Fixture.CreateContext();
@@ -131,12 +132,13 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
                 QuantityInStock = 36,
                 UnitPrice = -20000
             };
-            var result = await controller.PostProduct(product) as BadRequestResult;
+            //var result = await controller.PostProduct(product) as BadRequestResult;
 
-            context.ChangeTracker.Clear();
+            //context.ChangeTracker.Clear();
 
-            // Assert
-            Assert.IsType<BadRequestResult>(result);
+            //// Assert
+            //Assert.IsType<BadRequestResult>(result);
+            await Assert.ThrowsAsync<InvalidRequestInputException>(async () => await controller.PostProduct(product));
         }
     }
 }

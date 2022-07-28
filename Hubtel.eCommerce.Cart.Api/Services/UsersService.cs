@@ -1,5 +1,6 @@
 ﻿#nullable  disable
 using System;
+using Hubtel.eCommerce.Cart.Api.Exceptions;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Users.FindAsync(id);
         }
 
-        public async void UpdateUser(long id, UserPostDTO user)
+        public async Task UpdateUser(long id, UserPostDTO user)
         {
             var updatedUser = new User
             {
@@ -72,22 +73,22 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         {
             if (user.Name.Length <= 1)
             {
-                throw new ArgumentException("User name too short");
+                throw new InvalidRequestInputException("User name too short");
             }
 
             if (user.Name.Length > 50)
             {
-                throw new ArgumentException("User name too long");
+                throw new InvalidRequestInputException("User name too long");
             }
 
             if (user.PhoneNumber.Length <= 9)
             {
-                throw new ArgumentException("Phone number too short");
+                throw new InvalidRequestInputException("Phone number too short");
             }
 
             if (user.PhoneNumber.Length > 15)
             {
-                throw new ArgumentException("Phone number too long");
+                throw new InvalidRequestInputException("Phone number too long");
             }
         }
 

@@ -26,4 +26,16 @@
     <ProjectReference Include="..\Hubtel.eCommerce.Cart.Api\Hubtel.eCommerce.Cart.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="ControllerTests\" />
+    <None Remove="ControllerTests\CartItemsControllerTests\" />
+    <None Remove="ControllerTests\Products\" />
+    <None Remove="ControllerTests\Products %28copy%29\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ControllerTests\" />
+    <Folder Include="ControllerTests\CartItems\" />
+    <Folder Include="ControllerTests\Products\" />
+    <Folder Include="ControllerTests\Users\" />
+  </ItemGroup>
 </Project>

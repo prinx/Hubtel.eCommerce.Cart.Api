@@ -1,12 +1,10 @@
 ﻿using Hubtel.eCommerce.Cart.Api.Controllers;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
 {
-    public class ProductsControllerDeleteTest : CartTest
+    public class ProductsControllerDeleteTest : CartTest, IClassFixture<TestDatabaseFixture>
     {
         public ProductsControllerDeleteTest(TestDatabaseFixture fixture) : base(fixture)
         {

@@ -2,19 +2,17 @@
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
 {
-    public class ProductsControllerPutTest : CartTest
+    public class ProductsControllerPutTest : CartTest, IClassFixture<TestDatabaseFixture>
     {
         public ProductsControllerPutTest(TestDatabaseFixture fixture) : base(fixture)
         {
         }
 
         [Fact]
-        public void PutProduct_WithValidId_ShouldReturnNotContentResult()
+        public async void PutProduct_WithValidId_ShouldReturnNotContentResult()
         {
             // Arrange
             using var context = Fixture.CreateContext();
@@ -29,9 +27,9 @@ namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
                 QuantityInStock = 36,
                 UnitPrice = 20000
             };
-            var result = controller.PutProduct(3, product) as NoContentResult;
+            var result = await controller.PutProduct(3, product) as NoContentResult;
 
-            context.ChangeTracker.Clear();
+            //context.ChangeTracker.Clear();
 
             // Assert
             Assert.IsType<NoContentResult>(result);

@@ -1,5 +1,6 @@
 ﻿#nullable  disable
 using System;
+using Hubtel.eCommerce.Cart.Api.Exceptions;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Products.FindAsync(id);
         }
 
-        public async void UpdateProduct(long id, ProductPostDTO product)
+        public async Task UpdateProduct(long id, ProductPostDTO product)
         {
             var updatedProduct = new Product
             {
@@ -75,17 +76,17 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         {
             if (product.UnitPrice < 0)
             {
-                throw new ArgumentException("Product unit price invalid");
+                throw new InvalidRequestInputException("Product unit price invalid");
             }
 
             if (product.Name.Length <= 1)
             {
-                throw new ArgumentException("Product name too short");
+                throw new InvalidRequestInputException("Product name too short");
             }
 
             if (product.Name.Length > 50)
             {
-                throw new ArgumentException("Product name too long");
+                throw new InvalidRequestInputException("Product name too long");
             }
         }
 

@@ -1,17 +1,12 @@
 ﻿using Hubtel.eCommerce.Cart.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hubtel.eCommerce.Cart.Api.Tests
 {
 
     public class TestDatabaseFixture
     {
-        private const string ConnectionString = @"Server=localhost;Port=5432;Database=test_hubtel_ecommerce;User Id=postgres;Password=postgres";
+        private const string ConnectionString = "Server=localhost;Port=5432;Database=test_hubtel_ecommerce;User Id=postgres;Password=postgres";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
@@ -35,9 +30,11 @@ namespace Hubtel.eCommerce.Cart.Api.Tests
 
                         context.AddRange(
                             new User { Name = "Nuna", PhoneNumber = "+233000000000" },
-                            new User { Name = "Nuna", PhoneNumber = "+233000000001" },
-                            new User { Name = "Nuna", PhoneNumber = "+233000000002" }
+                            new User { Name = "Nono", PhoneNumber = "+233000000001" },
+                            new User { Name = "Brenda", PhoneNumber = "+233000000002" }
                         );
+
+                        context.SaveChanges();
 
                         context.AddRange(
                             new CartItem { ProductId = 1, Quantity = 2, UserId = 3 },
@@ -46,6 +43,8 @@ namespace Hubtel.eCommerce.Cart.Api.Tests
                         );
 
                         context.SaveChanges();
+
+                        context.Database.BeginTransaction();
                     }
 
                     _databaseInitialized = true;
@@ -59,8 +58,6 @@ namespace Hubtel.eCommerce.Cart.Api.Tests
                 new DbContextOptionsBuilder<CartContext>()
                     .UseNpgsql(ConnectionString)
                     .Options);
-
-            context.Database.BeginTransaction();
 
             return context;
         }

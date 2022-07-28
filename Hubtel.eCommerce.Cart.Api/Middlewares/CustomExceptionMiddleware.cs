@@ -1,4 +1,5 @@
-﻿using Hubtel.eCommerce.Cart.Api.Models;
+﻿using Hubtel.eCommerce.Cart.Api.Exceptions;
+using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using System.Net;
 
@@ -20,6 +21,11 @@ namespace Hubtel.eCommerce.Cart.Api.Middlewares
             try
             {
                 await _next(httpContext);
+            }
+            catch (InvalidRequestInputException ex)
+            {
+                _exceptionService.LogInvalidRequestInputException(httpContext, ex);
+                await _exceptionService.HandleInvalidRequestInputExceptionAsync(httpContext, ex);
             }
             catch (Exception ex)
             {

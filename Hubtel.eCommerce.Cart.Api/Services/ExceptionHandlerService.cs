@@ -21,6 +21,14 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             _logger.LogError($"[{DateTime.Now}] {method} {query}: Something went wrong: {exception}");
         }
 
+        public void LogInvalidRequestInputException(HttpContext httpContext, Exception exception)
+        {
+            var method = httpContext.Request.Method;
+            var query = httpContext.Request.Path;
+
+            _logger.LogError($"[{DateTime.Now}] {method} {query}: {exception.Message}");
+        }
+
         public async Task HandleExceptionAsync(HttpContext httpContext, Exception exception)
         {
             httpContext.Response.ContentType = "application/json";
@@ -34,5 +42,19 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
             await httpContext.Response.WriteAsync(responseText);
         }
+
+        public async Task HandleInvalidRequestInputExceptionAsync(HttpContext httpContext, Exception exception)
+        {
+            httpContext.Response.ContentType = "application/json";
+            httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            var responseText = JsonSerializer.Serialize(new ApiResponseDTO
+            {
+                Status = httpContext.Response.StatusCode,
+                Message = exception.Message,
+            });
+
+            await httpContext.Response.WriteAsync(responseText);
+        } 
     }
 }

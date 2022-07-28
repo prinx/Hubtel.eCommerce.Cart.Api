@@ -87,7 +87,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public IActionResult PutProduct(long id, ProductPostDTO product)
+        public async Task<IActionResult> PutProduct(long id, ProductPostDTO product)
         {
             _productsService.ValidateSentProduct(product);
 
@@ -109,7 +109,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             try
             {
-                _productsService.UpdateProduct(id, product);
+                await _productsService.UpdateProduct(id, product);
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
             }
             catch (DbUpdateConcurrencyException)
@@ -194,14 +194,14 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: " +
                 $"Product with id {id} deleted successfully.");
 
-            return Ok(new ApiResponseDTO
-            {
-                Status = (int)HttpStatusCode.OK,
-                Success = true,
-                Message = "Product deleted successfully."
-            });
+            //return Ok(new ApiResponseDTO
+            //{
+            //    Status = (int)HttpStatusCode.OK,
+            //    Success = true,
+            //    Message = "Product deleted successfully."
+            //});
 
-            //return NoContent();
+            return NoContent();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using Hubtel.eCommerce.Cart.Api.Exceptions;
+
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
     public class ControllerService : IControllerService
@@ -7,17 +9,17 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         {
             if (page <= 0)
             {
-                throw new ArgumentException("Invalid page");
+                throw new InvalidRequestInputException("Invalid page");
             }
 
             if (pageSize <= 0)
             {
-                throw new ArgumentException("Invalid page size");
+                throw new InvalidRequestInputException("Invalid page size");
             }
 
             if (pageSize > 1000)
             {
-                throw new ArgumentException("Page size too big");
+                throw new InvalidRequestInputException("Page size too big");
             }
         }
     }

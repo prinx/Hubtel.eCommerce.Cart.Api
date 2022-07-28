@@ -11,7 +11,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public Task<Product> GetSingleProduct(long id);
 
-        public void UpdateProduct(long id, ProductPostDTO product);
+        public Task UpdateProduct(long id, ProductPostDTO product);
 
         public Task<Product> CreateProduct(ProductPostDTO product);
 

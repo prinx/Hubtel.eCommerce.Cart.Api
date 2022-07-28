@@ -6,7 +6,7 @@ using Moq;
 
 namespace Hubtel.eCommerce.Cart.Api.Tests.ControllerTests.Products
 {
-    public class ProductsControllerGetSingleTest : CartTest
+    public class ProductsControllerGetSingleTest : CartTest, IClassFixture<TestDatabaseFixture>
     {
         public ProductsControllerGetSingleTest(TestDatabaseFixture fixture) : base(fixture)
         {

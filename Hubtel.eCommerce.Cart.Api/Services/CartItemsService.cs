@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
+using Hubtel.eCommerce.Cart.Api.Exceptions;
 
 namespace Hubtel.eCommerce.Cart.Api.Services
 {
@@ -27,22 +28,22 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         {
             if (phoneNumber != default && (phoneNumber.Length > 15 || phoneNumber.Length < 9))
             {
-                throw new ArgumentException("Invalid phone number");
+                throw new InvalidRequestInputException("Invalid phone number");
             }
 
             if (productId != default && productId <= 0)
             {
-                throw new ArgumentException("Product id must be greater than 0");
+                throw new InvalidRequestInputException("Product id must be greater than 0");
             }
 
             if ((minQuantity != default && minQuantity <= 0) || (maxQuantity != default && maxQuantity <= 0))
             {
-                throw new ArgumentException("Any specified item quantity must be greater than 0");
+                throw new InvalidRequestInputException("Any specified item quantity must be greater than 0");
             }
 
             if (startDate != default && endDate != default && startDate > endDate)
             {
-                throw new ArgumentException("Start date must be less than end date");
+                throw new InvalidRequestInputException("Start date must be less than end date");
             }
 
             ValidatePaginationQueryString(page, pageSize);
@@ -83,6 +84,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             var updatedCartItem = new CartItem
             {
                 Id = id,
+                Quantity = cartItem.Quantity,
                 ProductId = cartItem.ProductId,
                 UserId = cartItem.UserId
             };
@@ -125,12 +127,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         public async void UpdateCartItemQuantity(CartItem item, int quantity)
         {
             _context.CartItems.Update(item);
-            item.Quantity += quantity;
-
-            if (item.Quantity < 0)
-            {
-                throw new ArgumentException("Invalid product quantity");
-            }
+            item.Quantity = quantity;
 
             await _context.SaveChangesAsync();
         }
@@ -151,28 +148,28 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task ValidatePostRequestBody(CartItemPostDTO cartItem)
         {
-            if (cartItem.Quantity == 0)
+            if (cartItem.Quantity <= 0)
             {
-                throw new ArgumentException("Invalid product quantity.");
+                throw new InvalidRequestInputException("Invalid product quantity.");
             }
 
             var product = await _context.Products.FindAsync(cartItem.ProductId);
 
             if (product == null)
             {
-                throw new ArgumentException("Invalid product.");
+                throw new InvalidRequestInputException("Invalid product.");
             }
 
             if (cartItem.Quantity > product.QuantityInStock)
             {
-                throw new ArgumentException("Not enough products.");
+                throw new InvalidRequestInputException("Not enough products.");
             }
 
             var user = await _context.Users.FindAsync(cartItem.UserId);
 
             if (user == null)
             {
-                throw new ArgumentException("Invalid user.");
+                throw new InvalidRequestInputException("Invalid user.");
             }
         }
 
