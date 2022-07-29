@@ -1,5 +1,4 @@
 ﻿#nullable disable
-using System;
 using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Exceptions;
@@ -101,10 +100,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
                 items.Where(e => e.CreatedAt <= endDate);
             }
 
-            if (endDate != default)
-            {
-                items.Include(item => item.Product);
-            }
+            items.Include(item => item.Product);
 
             var query = items.AsQueryable();
 
@@ -118,7 +114,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task UpdateCartItem(long id, CartItemPostDTO cartItem)
+        public async Task<int> UpdateCartItem(long id, CartItemPostDTO cartItem)
         {
             var updatedCartItem = new CartItem
             {
@@ -130,7 +126,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
             _context.Entry(updatedCartItem).State = EntityState.Modified;
 
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
@@ -138,7 +134,6 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.CartItems
                 .Where(item => item.UserId == cartItem.UserId && item.ProductId == cartItem.ProductId)
                 .Include(item => item.Product)
-
                 .FirstOrDefaultAsync();
         }
 
@@ -157,18 +152,20 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return cartItem.Quantity <= 0;
         }
 
-        public async Task DeleteCartItem(CartItem cartItem)
+        public async Task<int> DeleteCartItem(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
-            await _context.SaveChangesAsync();
+
+            return await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateCartItemQuantity(CartItem item, int quantity)
+        public async Task<int> UpdateCartItemQuantity(CartItem item, int quantity)
         {
             _context.CartItems.Update(item);
+
             item.Quantity = quantity;
 
-            await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<CartItem> CreateCartItem(CartItemPostDTO item)
@@ -185,7 +182,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return newItem;
         }
 
-        public async Task ValidatePostRequestBody(CartItemPostDTO cartItem)
+        public async void ValidatePostRequestBody(CartItemPostDTO cartItem)
         {
             if (cartItem.Quantity <= 0)
             {

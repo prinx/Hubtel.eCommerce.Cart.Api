@@ -1,5 +1,4 @@
 ﻿#nullable  disable
-using System;
 using Hubtel.eCommerce.Cart.Api.Exceptions;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +22,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         public async Task<Pagination<User>> GetUsers(int page, int pageSize)
         {
             var query = _context.Users.AsQueryable();
+
             return await PaginationService.Paginate(query, page, pageSize);
         }
 
@@ -31,7 +31,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task UpdateUser(long id, UserPostDTO user)
+        public async Task<int> UpdateUser(long id, UserPostDTO user)
         {
             var updatedUser = new User
             {
@@ -41,7 +41,8 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             };
 
             _context.Entry(updatedUser).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<User> CreateUser(UserPostDTO user)
@@ -53,6 +54,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             };
 
             _context.Users.Add(newUser);
+
             await _context.SaveChangesAsync();
 
             return newUser;
@@ -63,10 +65,11 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task DeleteUser(User user)
+        public async Task<int> DeleteUser(User user)
         {
             _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+
+            return await _context.SaveChangesAsync();
         }
 
         public void ValidateSentUser(UserPostDTO user)

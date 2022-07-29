@@ -11,6 +11,7 @@ using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Hubtel.eCommerce.Cart.Api.Filters;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
@@ -120,7 +121,24 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            await _productsService.UpdateProduct(id, product);
+            var numChangedRow = await _productsService.UpdateProduct(id, product);
+
+            if (numChangedRow == 0)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Error while updating: {numChangedRow} row(s) changed.");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                    {
+                        Status = (int)HttpStatusCode.InternalServerError,
+                        Message = "Something went wrong"
+                    });
+
+                return new ContentResult {
+                    Content = responseData,
+                    ContentType = "Application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
 
             _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
 

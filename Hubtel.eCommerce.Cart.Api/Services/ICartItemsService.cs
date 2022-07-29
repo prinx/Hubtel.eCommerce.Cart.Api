@@ -29,7 +29,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public Task<CartItem> GetSingleCartItem(long id);
 
-        public Task UpdateCartItem(long id, CartItemPostDTO cartItem);
+        public Task<int> UpdateCartItem(long id, CartItemPostDTO cartItem);
 
         public Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem);
 
@@ -39,13 +39,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public bool QuantityNegativeOnCreation(CartItemPostDTO cartItem);
 
-        public Task DeleteCartItem(CartItem cartItem);
+        public Task<int> DeleteCartItem(CartItem cartItem);
 
-        public Task UpdateCartItemQuantity(CartItem item, int quantity);
+        public Task<int> UpdateCartItemQuantity(CartItem item, int quantity);
 
         public Task<CartItem> CreateCartItem(CartItemPostDTO item);
 
-        public Task ValidatePostRequestBody(CartItemPostDTO cartItem);
+        public void ValidatePostRequestBody(CartItemPostDTO cartItem);
 
         public bool CartItemExists(long id);
     }
