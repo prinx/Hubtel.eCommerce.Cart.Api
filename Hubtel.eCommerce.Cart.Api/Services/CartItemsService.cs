@@ -114,6 +114,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
+        public async Task<CartItem> GetSingleCartItem(long productId, long userId)
+        {
+            return await _context.CartItems
+                .Include(e => e.Product)
+                .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
+        }
+
         public async Task<bool> UpdateCartItem(long id, CartItemPostDTO cartItem)
         {
             var updatedCartItem = new CartItem
@@ -134,9 +141,15 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         public async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
         {
             return await _context.CartItems
-                .Where(item => item.UserId == cartItem.UserId && item.ProductId == cartItem.ProductId)
-                .Include(item => item.Product)
-                .FirstOrDefaultAsync();
+                .Include(e => e.Product)
+                .FirstOrDefaultAsync(e => e.UserId == cartItem.UserId && e.ProductId == cartItem.ProductId);
+        }
+
+        public async Task<CartItem> RetrieveFullCartItem(long productId, long userId)
+        {
+            return await _context.CartItems
+                .Include(e => e.Product)
+                .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
         }
 
         public async Task<CartItem> RetrieveFullCartItem(long id)

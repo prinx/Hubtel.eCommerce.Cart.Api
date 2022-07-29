@@ -29,9 +29,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public Task<CartItem> GetSingleCartItem(long id);
 
+        public Task<CartItem> GetSingleCartItem(long productId, long userId);
+
         public Task<bool> UpdateCartItem(long id, CartItemPostDTO cartItem);
 
         public Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem);
+
+        public Task<CartItem> RetrieveFullCartItem(long productId, long userId);
 
         public Task<CartItem> RetrieveFullCartItem(long id);
 
