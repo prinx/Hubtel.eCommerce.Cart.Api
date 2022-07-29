@@ -1,16 +1,9 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Hubtel.eCommerce.Cart.Api.Filters;
-using System.Text.RegularExpressions;
 using System.Text.Json;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
@@ -121,11 +114,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            var numChangedRow = await _productsService.UpdateProduct(id, product);
+            var updated = await _productsService.UpdateProduct(id, product);
 
-            if (numChangedRow == 0)
+            if (!updated)
             {
-                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Error while updating: {numChangedRow} row(s) changed.");
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Error while saving updated product to database. Payload: {product}");
 
                 var responseData = JsonSerializer.Serialize(new ApiResponseDTO
                     {
@@ -135,7 +128,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
                 return new ContentResult {
                     Content = responseData,
-                    ContentType = "Application/json",
+                    ContentType = "application/json",
                     StatusCode = (int)HttpStatusCode.InternalServerError
                 };
             }
@@ -159,7 +152,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: " +
                     $"Product with Name {product.Name} already exists. ");
-
+                
                 return Conflict(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.Conflict,
@@ -168,6 +161,25 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
 
             var newProduct = await _productsService.CreateProduct(product);
+
+            //if (!created)
+            //{
+            //    _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: " +
+            //        $"Error while saving new product to database. Paylaod: {product}. ItemToSave: {newProduct}");
+
+            //    var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+            //    {
+            //        Status = (int)HttpStatusCode.InternalServerError,
+            //        Message = "Something went wrong"
+            //    });
+
+            //    return new ContentResult
+            //    {
+            //        Content = responseData,
+            //        ContentType = "application/json",
+            //        StatusCode = (int)HttpStatusCode.InternalServerError
+            //    };
+            //}
 
             _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: " +
                 $"Product with name '{product.Name}' created successfully.");
@@ -199,17 +211,28 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            await _productsService.DeleteProduct(product);
+            var deleted = await _productsService.DeleteProduct(product);
+
+            if (!deleted)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Error while deleting product from database. Payload: {product}");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
+
+                return new ContentResult
+                {
+                    Content = responseData,
+                    ContentType = "application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: " +
                 $"Product with id {id} deleted successfully.");
-
-            //return Ok(new ApiResponseDTO
-            //{
-            //    Status = (int)HttpStatusCode.OK,
-            //    Success = true,
-            //    Message = "Product deleted successfully."
-            //});
 
             return NoContent();
         }

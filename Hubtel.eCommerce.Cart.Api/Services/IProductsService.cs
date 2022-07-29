@@ -11,13 +11,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public Task<Product> GetSingleProduct(long id);
 
-        public Task<int> UpdateProduct(long id, ProductPostDTO product);
+        public Task<bool> UpdateProduct(long id, ProductPostDTO product);
 
         public Task<Product> CreateProduct(ProductPostDTO product);
 
         public Task<Product> RetrieveProduct(long id);
 
-        public Task<int> DeleteProduct(Product product);
+        public Task<bool> DeleteProduct(Product product);
 
         public void ValidateSentProduct(ProductPostDTO product);
 

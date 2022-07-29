@@ -31,7 +31,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<int> UpdateUser(long id, UserPostDTO user)
+        public async Task<bool> UpdateUser(long id, UserPostDTO user)
         {
             var updatedUser = new User
             {
@@ -42,7 +42,9 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
             _context.Entry(updatedUser).State = EntityState.Modified;
 
-            return await _context.SaveChangesAsync();
+            var numRowChanged = await _context.SaveChangesAsync();
+
+            return numRowChanged == 1;
         }
 
         public async Task<User> CreateUser(UserPostDTO user)
@@ -65,11 +67,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<int> DeleteUser(User user)
+        public async Task<bool> DeleteUser(User user)
         {
             _context.Users.Remove(user);
 
-            return await _context.SaveChangesAsync();
+            var numRowChanged = await _context.SaveChangesAsync();
+
+            return numRowChanged == 1;
         }
 
         public void ValidateSentUser(UserPostDTO user)

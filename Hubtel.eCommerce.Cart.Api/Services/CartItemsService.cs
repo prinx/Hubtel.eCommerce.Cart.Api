@@ -114,7 +114,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task<int> UpdateCartItem(long id, CartItemPostDTO cartItem)
+        public async Task<bool> UpdateCartItem(long id, CartItemPostDTO cartItem)
         {
             var updatedCartItem = new CartItem
             {
@@ -126,7 +126,9 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
             _context.Entry(updatedCartItem).State = EntityState.Modified;
 
-            return await _context.SaveChangesAsync();
+            var changedRow = await _context.SaveChangesAsync();
+
+            return changedRow == 1;
         }
 
         public async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
@@ -152,20 +154,24 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return cartItem.Quantity <= 0;
         }
 
-        public async Task<int> DeleteCartItem(CartItem cartItem)
+        public async Task<bool> DeleteCartItem(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
 
-            return await _context.SaveChangesAsync();
+            var changedRow = await _context.SaveChangesAsync();
+
+            return changedRow == 1;
         }
 
-        public async Task<int> UpdateCartItemQuantity(CartItem item, int quantity)
+        public async Task<bool> UpdateCartItemQuantity(CartItem item, int quantity)
         {
             _context.CartItems.Update(item);
 
             item.Quantity = quantity;
 
-            return await _context.SaveChangesAsync();
+            var changedRow = await _context.SaveChangesAsync();
+
+            return changedRow == 1;
         }
 
         public async Task<CartItem> CreateCartItem(CartItemPostDTO item)
@@ -182,7 +188,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return newItem;
         }
 
-        public async void ValidatePostRequestBody(CartItemPostDTO cartItem)
+        public async Task ValidatePostRequestBody(CartItemPostDTO cartItem)
         {
             if (cartItem.Quantity <= 0)
             {

@@ -10,13 +10,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public Task<User> GetSingleUser(long id);
 
-        public Task<int> UpdateUser(long id, UserPostDTO user);
+        public Task<bool> UpdateUser(long id, UserPostDTO user);
 
         public Task<User> CreateUser(UserPostDTO user);
 
         public Task<User> RetrieveUser(long id);
 
-        public Task<int> DeleteUser(User user);
+        public Task<bool> DeleteUser(User user);
 
         public void ValidateSentUser(UserPostDTO user);
 

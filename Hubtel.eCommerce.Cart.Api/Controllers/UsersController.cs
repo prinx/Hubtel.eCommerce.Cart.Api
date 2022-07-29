@@ -4,6 +4,7 @@ using Hubtel.eCommerce.Cart.Api.Models;
 using System.Net;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Hubtel.eCommerce.Cart.Api.Filters;
+using System.Text.Json;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
@@ -112,7 +113,25 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            await _usersService.UpdateUser(id, user);
+            var updated = await _usersService.UpdateUser(id, user);
+
+            if (!updated)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: Error while saving updated user to database. Payload: {user}");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
+
+                return new ContentResult
+                {
+                    Content = responseData,
+                    ContentType = "application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
 
             _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
 
@@ -172,7 +191,25 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            await _usersService.DeleteUser(user);
+            var deleted = await _usersService.DeleteUser(user);
+
+            if (!deleted)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: Error while deleting user from database. Payload: {user}");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
+
+                return new ContentResult
+                {
+                    Content = responseData,
+                    ContentType = "application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 

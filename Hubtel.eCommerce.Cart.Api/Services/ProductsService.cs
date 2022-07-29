@@ -32,7 +32,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Products.FindAsync(id);
         }
 
-        public async Task<int> UpdateProduct(long id, ProductPostDTO product)
+        public async Task<bool> UpdateProduct(long id, ProductPostDTO product)
         {
             var updatedProduct = new Product
             {
@@ -44,7 +44,9 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
             _context.Entry(updatedProduct).State = EntityState.Modified;
 
-            return await _context.SaveChangesAsync();
+            var numRowChanged = await _context.SaveChangesAsync();
+
+            return numRowChanged == 1;
         }
 
         public async Task<Product> CreateProduct(ProductPostDTO product)
@@ -58,7 +60,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
             _context.Products.Add(newProduct);
 
-            var changedRow = await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return newProduct;
         }
@@ -68,11 +70,13 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             return await _context.Products.FindAsync(id);
         }
 
-        public async Task<int> DeleteProduct(Product product)
+        public async Task<bool> DeleteProduct(Product product)
         {
             _context.Products.Remove(product);
 
-            return await _context.SaveChangesAsync();
+            var numRowChanged = await _context.SaveChangesAsync();
+
+            return numRowChanged == 1;
         }
 
         public void ValidateSentProduct(ProductPostDTO product)

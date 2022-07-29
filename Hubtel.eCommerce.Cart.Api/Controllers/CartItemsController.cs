@@ -1,10 +1,10 @@
 ﻿#nullable disable
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using Hubtel.eCommerce.Cart.Api.Filters;
+using System.Text.Json;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
@@ -123,7 +123,25 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            await _cartItemsService.UpdateCartItem(id, cartItem);
+            var updated = await _cartItemsService.UpdateCartItem(id, cartItem);
+
+            if (!updated)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products: Error while saving updated cart to database. Payload: {cartItem}");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
+
+                return new ContentResult
+                {
+                    Content = responseData,
+                    ContentType = "application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
 
             _logger.LogInformation($"[{DateTime.Now}] PUT: api/CartItems/{id}: Cart item updated successfuly.");
 
@@ -139,22 +157,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             CartItem fullItem = await _cartItemsService.RetrieveFullCartItem(cartItem);
 
-            if (fullItem != null)
-            {
-                await _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
-
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
-                fullItem.User = null;
-
-                return CreatedAtAction(nameof(GetCartItem), new { id = fullItem.Id }, new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.Created,
-                    Success = true,
-                    Message = "Product(s) added to cart successfully.",
-                    Data = fullItem
-                });
-            }
-            else
+            if (fullItem == null)
             {
                 var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
@@ -169,6 +172,37 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                     Data = newItem
                 });
             }
+
+            fullItem.User = null;
+            var updated = await _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
+
+            if (!updated)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Error while saving updated cart to database. Payload: {cartItem} Item: {fullItem}");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
+
+                return new ContentResult
+                {
+                    Content = responseData,
+                    ContentType = "application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
+
+            _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
+
+            return CreatedAtAction(nameof(GetCartItem), new { id = fullItem.Id }, new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.Created,
+                Success = true,
+                Message = "Product(s) added to cart successfully.",
+                Data = fullItem
+            });
         }
 
         // DELETE: api/CartItems/5
@@ -188,9 +222,29 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            await _cartItemsService.DeleteCartItem(cartItem);
+            var deleted = await _cartItemsService.DeleteCartItem(cartItem);
 
-            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart item deleted successfully.");
+            cartItem.User = null;
+
+            if (!deleted)
+            {
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Error while deleting cart from database. Payload: {cartItem}");
+
+                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
+
+                return new ContentResult
+                {
+                    Content = responseData,
+                    ContentType = "application/json",
+                    StatusCode = (int)HttpStatusCode.InternalServerError
+                };
+            }
+
+            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart deleted successfully.");
 
             return NoContent();
         }
