@@ -109,13 +109,16 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> GetSingleCartItem(long id)
         {
+            _context.Configuration.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
+                .Include(e => e.User)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public async Task<CartItem> GetSingleCartItem(long productId, long userId)
         {
+            _context.Configuration.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
                 .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
@@ -140,6 +143,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
         {
+            _context.Configuration.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
                 .FirstOrDefaultAsync(e => e.UserId == cartItem.UserId && e.ProductId == cartItem.ProductId);
@@ -147,6 +151,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> RetrieveFullCartItem(long productId, long userId)
         {
+            _context.Configuration.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
                 .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
@@ -154,6 +159,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> RetrieveFullCartItem(long id)
         {
+            _context.Configuration.LazyLoadingEnabled = false;
             return await _context.CartItems.FindAsync(id);
         }
 

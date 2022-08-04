@@ -37,7 +37,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
                 _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
-                newItem.User = null;
+                //newItem.User = null;
 
                 return CreatedAtAction(nameof(GetCartItem), new { id = newItem.Id }, new ApiResponseDTO
                 {
@@ -48,7 +48,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            fullItem.User = null;
+            //fullItem.User = null;
             var updated = await _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
             if (!updated)

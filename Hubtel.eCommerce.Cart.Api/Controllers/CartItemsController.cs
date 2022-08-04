@@ -38,17 +38,17 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
 
-            if (pageItems.Items.Count <= 0)
-            {
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
+            // if (pageItems.Items.Count <= 0)
+            // {
+            //     _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
 
-                return NotFound(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.NotFound,
-                    Message = "No cart item found.",
-                    Data = pageItems
-                });
-            }
+            //     return NotFound(new ApiResponseDTO
+            //     {
+            //         Status = (int)HttpStatusCode.NotFound,
+            //         Message = "No cart item found.",
+            //         Data = pageItems
+            //     });
+            // }
 
             var message = $"{pageItems.Items.Count} cart item(s) Found.";
                 
