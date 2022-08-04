@@ -159,7 +159,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         // 3. Provide an endpoint list all cart items (with filters => phoneNumbers, time, quantity, item - GET
         // GET: api/Carts
         [HttpGet]
-        public async Task<ActionResult> GetCartItems(CartItemGetManyParams queryParams)
+        public async Task<ActionResult> GetCartItems([FromQuery] CartItemGetManyParams queryParams)
         {
             _cartItemsService.ValidateGetCartItemsQueryString(queryParams);
 
