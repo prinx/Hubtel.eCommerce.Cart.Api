@@ -11,7 +11,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
     [ValidationActionFilter]
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : CustomControllerBase
     {
         protected readonly IUsersService _usersService;
         protected readonly ILogger<UsersController> _logger;
@@ -61,7 +61,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 Status = (int)HttpStatusCode.OK,
                 Success = true,
-                Message = "Found.",
+                Message = "Ok",
                 Data = user
             });
         }
@@ -107,23 +107,22 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: Error while saving updated user to database. Payload: {user}");
 
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                return InternalServerError(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Message = "Something went wrong"
                 });
-
-                return new ContentResult
-                {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
             }
 
             _logger.LogInformation($"[{DateTime.Now}] PUT: api/Users/{id}: User updated successfully.");
 
-            return NoContent();
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "User updated successfully",
+                Data = user
+            }); ;
         }
 
         // POST: api/Users
@@ -185,30 +184,21 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: Error while deleting user from database. Payload: {user}");
 
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                return InternalServerError(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Message = "Something went wrong"
                 });
-
-                return new ContentResult
-                {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
             }
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Users/{id}: User deleted successfully.");
 
-            //return Ok(new ApiResponseDTO
-            //{
-            //    Status = (int)HttpStatusCode.OK,
-            //    Success = true,
-            //    Message = "User deleted usccessfully."
-            //});
-
-            return NoContent();
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "User deleted successfully"
+            });
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
     [ValidationActionFilter]
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class ProductsController : CustomControllerBase
     {
         private readonly IProductsService _productsService;
         private readonly ILogger<ProductsController> _logger;
@@ -61,7 +61,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 Status = (int)HttpStatusCode.OK,
                 Success = true,
-                Message = "Found.",
+                Message = "Ok",
                 Data = product
             });
         }
@@ -108,22 +108,22 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Error while saving updated product to database. Payload: {product}");
 
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
-                    {
-                        Status = (int)HttpStatusCode.InternalServerError,
-                        Message = "Something went wrong"
-                    });
-
-                return new ContentResult {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
+                return InternalServerError(new ApiResponseDTO
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Message = "Something went wrong"
+                });
             }
 
             _logger.LogInformation($"[{DateTime.Now}] PUT: api/Products/{id}: Product updated successfully.");
 
-            return NoContent();
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Ok",
+                Data = product
+            });
         }
 
         // POST: api/Products
@@ -205,24 +205,23 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: Error while deleting product from database. Payload: {product}");
 
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                return InternalServerError(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Message = "Something went wrong"
                 });
-
-                return new ContentResult
-                {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
             }
 
             _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Products/{id}: " +
                 $"Product with id {id} deleted successfully.");
 
-            return NoContent();
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Ok",
+                Data = product
+            });
         }
     }
 }
