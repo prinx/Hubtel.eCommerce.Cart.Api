@@ -4,9 +4,11 @@ using Hubtel.eCommerce.Cart.Api.Models;
 using Hubtel.eCommerce.Cart.Api.Services;
 using System.Net;
 using System.Text.Json;
+using Hubtel.eCommerce.Cart.Api.Filters;
 
 namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
+    [ValidationActionFilter]
     [Route("api/[controller]")]
     [ApiController]
     public class CartsController : CustomControllerBase
