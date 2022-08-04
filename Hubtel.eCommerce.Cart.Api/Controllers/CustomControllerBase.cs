@@ -6,6 +6,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
     public class CustomControllerBase : ControllerBase
     {
+        [NonAction]
         public ActionResult InternalServerError(object payload)
         {
             var responseData = JsonSerializer.Serialize(payload);
