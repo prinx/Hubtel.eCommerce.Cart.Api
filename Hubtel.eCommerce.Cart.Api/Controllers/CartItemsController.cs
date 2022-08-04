@@ -24,31 +24,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // GET: api/CartItems
         [HttpGet]
-        public async Task<ActionResult> GetCartItems(
-            [FromQuery] string phoneNumber = default,
-            [FromQuery] long productId = default,
-            [FromQuery] int minQuantity = default,
-            [FromQuery] int maxQuantity = default,
-            [FromQuery] DateTime from = default,
-            [FromQuery] DateTime to = default,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 3)
+        public async Task<ActionResult> GetCartItems(CartItemGetManyParams queryParams)
         {
-            _cartItemsService.ValidateGetCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
+            _cartItemsService.ValidateGetCartItemsQueryString(queryParams);
 
-            var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
-
-            // if (pageItems.Items.Count <= 0)
-            // {
-            //     _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
-
-            //     return NotFound(new ApiResponseDTO
-            //     {
-            //         Status = (int)HttpStatusCode.NotFound,
-            //         Message = "No cart item found.",
-            //         Data = pageItems
-            //     });
-            // }
+            var pageItems = await _cartItemsService.GetCartItems(queryParams);
 
             var message = $"{pageItems.Items.Count} cart item(s) Found.";
                 

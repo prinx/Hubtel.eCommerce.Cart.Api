@@ -5,27 +5,9 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 {
     public interface ICartItemsService : IControllerService
     {
-        public void ValidateGetCartItemsQueryString(
-            string? phoneNumber = default,
-            long productId = default,
-            int minQuantity = default,
-            int maxQuantity = default,
-            DateTime startDate = default,
-            DateTime endDate = default,
-            int page = default,
-            int pageSize = default
-        );
+        public void ValidateGetCartItemsQueryString(CartItemGetManyParams queryParams);
 
-        public Task<Pagination<CartItem>> GetCartItems(
-            string? phoneNumber = default,
-            long productId = default,
-            int minQuantity = default,
-            int maxQuantity = default,
-            DateTime startDate = default,
-            DateTime endDate = default,
-            int page = default,
-            int pageSize = default
-        );
+        public Task<Pagination<CartItem>> GetCartItems(CartItemGetManyParams queryParams);
 
         public Task<CartItem> GetSingleCartItem(long id);
 

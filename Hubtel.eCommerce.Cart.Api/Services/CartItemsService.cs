@@ -14,102 +14,85 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             _context = context;
         }
 
-        public void ValidateGetCartItemsQueryString(
-            string phoneNumber = default,
-            long productId = default,
-            int minQuantity = default,
-            int maxQuantity = default,
-            DateTime startDate = default,
-            DateTime endDate = default,
-            int page = default,
-            int pageSize = default
-        )
+        public void ValidateGetCartItemsQueryString(CartItemGetManyParams queryParams)
         {
-            if (phoneNumber != default && (phoneNumber.Length > 15 || phoneNumber.Length < 9))
+            if (queryParams.PhoneNumber != default && (queryParams.PhoneNumber.Length > 15 || queryParams.PhoneNumber.Length < 9))
             {
                 throw new InvalidRequestInputException("Invalid phone number");
             }
 
-            if (productId != default && productId <= 0)
+            if (queryParams.ProductId != default && queryParams.ProductId <= 0)
             {
                 throw new InvalidRequestInputException("Product id must be greater than 0");
             }
 
-            if ((minQuantity != default && minQuantity <= 0) || (maxQuantity != default && maxQuantity <= 0))
+            if ((queryParams.MinQuantity != default && queryParams.MinQuantity <= 0) || (queryParams.MaxQuantity != default && queryParams.MaxQuantity <= 0))
             {
                 throw new InvalidRequestInputException("Any specified item quantity must be greater than 0");
             }
 
-            if (startDate != default && endDate != default && startDate > endDate)
+            if (queryParams.From != default && queryParams.To != default && queryParams.From > queryParams.To)
             {
                 throw new InvalidRequestInputException("Start date must be less than end date");
             }
 
-            ValidatePaginationQueryString(page, pageSize);
+            ValidatePaginationQueryString(queryParams.Page, queryParams.PageSize);
         }
 
-        public async Task<Pagination<CartItem>> GetCartItems(
-            string phoneNumber = default,
-            long productId = default,
-            int minQuantity = default,
-            int maxQuantity = default,
-            DateTime startDate = default,
-            DateTime endDate = default,
-            int page = default,
-            int pageSize = default)
+        public async Task<Pagination<CartItem>> GetCartItems(CartItemGetManyParams queryParams)
         {
             var items = _context.CartItems;
 
-            if (phoneNumber != default)
+            if (queryParams.PhoneNumber != default)
             {
-                items.Where(e => e.User.PhoneNumber == phoneNumber);
+                items.Where(e => e.User.PhoneNumber == queryParams.PhoneNumber);
             }
 
-            if (productId != default)
+            if (queryParams.ProductId != default)
             {
-                items.Where(e => e.User.PhoneNumber == phoneNumber);
+                items.Where(e => e.User.PhoneNumber == queryParams.PhoneNumber);
             }
 
-            if (productId != default)
+            if (queryParams.ProductId != default)
             {
-                items.Where(e => e.ProductId == productId);
+                items.Where(e => e.ProductId == queryParams.ProductId);
             }
 
-            if (minQuantity != default)
+            if (queryParams.MinQuantity != default)
             {
-                items.Where(e => e.Quantity >= minQuantity);
+                items.Where(e => e.Quantity >= queryParams.MinQuantity);
             }
 
-            if (maxQuantity != default)
+            if (queryParams.MaxQuantity != default)
             {
-                items.Where(e => e.Quantity <= maxQuantity);
+                items.Where(e => e.Quantity <= queryParams.MaxQuantity);
             }
 
-            if (startDate != default)
+            if (queryParams.From != default)
             {
-                items.Where(e => e.Quantity <= maxQuantity);
+                items.Where(e => e.Quantity <= queryParams.MaxQuantity);
             }
 
-            if (startDate != default)
+            if (queryParams.From != default)
             {
-                items.Where(e => e.CreatedAt >= startDate);
+                items.Where(e => e.CreatedAt >= queryParams.From);
             }
 
-            if (endDate != default)
+            if (queryParams.To != default)
             {
-                items.Where(e => e.CreatedAt <= endDate);
+                items.Where(e => e.CreatedAt <= queryParams.To);
             }
 
             items.Include(item => item.Product);
 
             var query = items.AsQueryable();
 
-            return await PaginationService.Paginate(query, page, pageSize);
+            return await PaginationService.Paginate(query, queryParams.Page, queryParams.PageSize);
         }
 
         public async Task<CartItem> GetSingleCartItem(long id)
         {
-            _context.Configuration.LazyLoadingEnabled = false;
+            _context.ChangeTracker.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
                 .Include(e => e.User)
@@ -118,7 +101,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> GetSingleCartItem(long productId, long userId)
         {
-            _context.Configuration.LazyLoadingEnabled = false;
+            _context.ChangeTracker.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
                 .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
@@ -143,23 +126,25 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> RetrieveFullCartItem(CartItemPostDTO cartItem)
         {
-            _context.Configuration.LazyLoadingEnabled = false;
+            _context.ChangeTracker.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
+                .Include(e => e.User)
                 .FirstOrDefaultAsync(e => e.UserId == cartItem.UserId && e.ProductId == cartItem.ProductId);
         }
 
         public async Task<CartItem> RetrieveFullCartItem(long productId, long userId)
         {
-            _context.Configuration.LazyLoadingEnabled = false;
+            _context.ChangeTracker.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
+                .Include(e => e.User)
                 .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
         }
 
         public async Task<CartItem> RetrieveFullCartItem(long id)
         {
-            _context.Configuration.LazyLoadingEnabled = false;
+            _context.ChangeTracker.LazyLoadingEnabled = false;
             return await _context.CartItems.FindAsync(id);
         }
 
@@ -186,7 +171,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         {
             _context.CartItems.Update(item);
 
-            item.Quantity = quantity;
+            item.Quantity += quantity;
 
             var changedRow = await _context.SaveChangesAsync();
 

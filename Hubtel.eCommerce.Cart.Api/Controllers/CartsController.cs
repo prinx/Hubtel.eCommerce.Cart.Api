@@ -9,7 +9,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CartsController : ControllerBase
+    public class CartsController : CustomControllerBase
     {
         private readonly ICartItemsService _cartItemsService;
         private readonly ILogger<CartItemsController> _logger;
@@ -20,12 +20,11 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             _cartItemsService = cartItemsService;
         }
 
-       // 1. Provide an endpoint to Add items to cart, with specified quantity
-       // Adding similar items(same item ID) should increase the quantity - POST
+        // 1. Provide an endpoint to Add items to cart, with specified quantity
+        // Adding similar items(same item ID) should increase the quantity - POST
 
-       // POST: api/CartItems
-       // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-       [HttpPost]
+        // POST: api/Carts
+        [HttpPost]
         public async Task<ActionResult> PostCartItem(CartItemPostDTO cartItem)
         {
             await _cartItemsService.ValidatePostRequestBody(cartItem);
@@ -36,40 +35,31 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 var newItem = await _cartItemsService.CreateCartItem(cartItem);
 
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: New cart item created for user {cartItem.UserId}");
-                //newItem.User = null;
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Carts: New cart item created for user {cartItem.UserId}");
 
                 return CreatedAtAction(nameof(GetCartItem), new { id = newItem.Id }, new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.Created,
                     Success = true,
-                    Message = "Product(s) added to cart successfully",
+                    Message = "Item(s) added to cart successfully",
                     Data = newItem
                 });
             }
 
-            //fullItem.User = null;
             var updated = await _cartItemsService.UpdateCartItemQuantity(fullItem, cartItem.Quantity);
 
             if (!updated)
             {
-                _logger.LogInformation($"[{DateTime.Now}] POST: api/Products: Error while saving updated cart to database. Payload: {cartItem} Item: {fullItem}");
+                _logger.LogInformation($"[{DateTime.Now}] POST: api/Carts: Error while saving updated cart to database. Payload: {cartItem} Item: {fullItem}");
 
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                return InternalServerError(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Message = "Something went wrong"
                 });
-
-                return new ContentResult
-                {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
             }
 
-            _logger.LogInformation($"[{DateTime.Now}] POST: api/CartItems: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
+            _logger.LogInformation($"[{DateTime.Now}] POST: api/Carts: Product {fullItem.Product.Name} quantity increased in the cart of user {cartItem.UserId}");
 
             return CreatedAtAction(nameof(GetCartItem), new { id = fullItem.Id }, new ApiResponseDTO
             {
@@ -81,7 +71,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         }
 
         // 2.a. Provide an endpoint to remove an item from cart - DELETE verb
-        // DELETE: api/CartItems/5
+        // DELETE: api/Carts/5/2
         [HttpDelete("{productId}/{userId}")]
         public async Task<IActionResult> DeleteCartItem(long productId, long userId)
         {
@@ -89,7 +79,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             if (cartItem == null)
             {
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{productId}/{userId}: Cart item does not exist. Cannot delete.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{productId}/{userId}: Cart item does not exist.");
 
                 return NotFound(new ApiResponseDTO
                 {
@@ -100,33 +90,29 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             var deleted = await _cartItemsService.DeleteCartItem(cartItem);
 
-            cartItem.User = null;
-
             if (!deleted)
             {
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{productId}/{userId}: Error while deleting cart from database. Payload: {cartItem}");
-
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{productId}/{userId}: Error while deleting cart item from database.");
+                
+                return InternalServerError(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Message = "Something went wrong"
                 });
-
-                return new ContentResult
-                {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
             }
 
-            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{productId}/{userId}: Cart deleted successfully.");
+            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{productId}/{userId}: Cart item deleted successfully.");
 
-            return NoContent();
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Cart item deleted sucessfully"
+            });
         }
 
         // 2.b. Provide an endpoint to remove an item from cart - DELETE verb
-        // DELETE: api/CartItems/5
+        // DELETE: api/Carts/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCartItem(long id)
         {
@@ -134,7 +120,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             if (cartItem == null)
             {
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart item does not exist. Cannot delete.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{id}: Cart item does not exist. Cannot delete.");
 
                 return NotFound(new ApiResponseDTO
                 {
@@ -149,59 +135,37 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             if (!deleted)
             {
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Error while deleting cart from database. Payload: {cartItem}");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{id}: Error while deleting cart from database. Payload: {cartItem}");
 
-                var responseData = JsonSerializer.Serialize(new ApiResponseDTO
+                return InternalServerError(new ApiResponseDTO
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
                     Message = "Something went wrong"
                 });
-
-                return new ContentResult
-                {
-                    Content = responseData,
-                    ContentType = "application/json",
-                    StatusCode = (int)HttpStatusCode.InternalServerError
-                };
             }
 
-            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/CartItems/{id}: Cart deleted successfully.");
+            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{id}: Cart deleted successfully.");
 
-            return NoContent();
+            return Ok(new ApiResponseDTO
+            {
+                Status = (int)HttpStatusCode.OK,
+                Success = true,
+                Message = "Cart item deleted sucessfully"
+            });
         }
 
         // 3. Provide an endpoint list all cart items (with filters => phoneNumbers, time, quantity, item - GET
-        // GET: api/CartItems
+        // GET: api/Carts
         [HttpGet]
-        public async Task<ActionResult> GetCartItems(
-            [FromQuery] string phoneNumber = default,
-            [FromQuery] long productId = default,
-            [FromQuery] int minQuantity = default,
-            [FromQuery] int maxQuantity = default,
-            [FromQuery] DateTime from = default,
-            [FromQuery] DateTime to = default,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 3)
+        public async Task<ActionResult> GetCartItems(CartItemGetManyParams queryParams)
         {
-            _cartItemsService.ValidateGetCartItemsQueryString(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
+            _cartItemsService.ValidateGetCartItemsQueryString(queryParams);
 
-            var pageItems = await _cartItemsService.GetCartItems(phoneNumber, productId, minQuantity, maxQuantity, from, to, page, pageSize);
+            var pageItems = await _cartItemsService.GetCartItems(queryParams);
 
-            if (pageItems.Items.Count <= 0)
-            {
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: No cart item found.");
+            var message = $"{pageItems.Items.Count} cart item(s) found.";
 
-                return NotFound(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.NotFound,
-                    Message = "No cart item found.",
-                    Data = pageItems
-                });
-            }
-
-            var message = $"{pageItems.Items.Count} cart item(s) Found.";
-
-            _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems: {message}");
+            _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts: {message}");
 
             return Ok(new ApiResponseDTO
             {
@@ -213,7 +177,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         }
 
         // 4.a. Provide endpoint to get single item - GET
-        // GET: api/CartItems/4/5
+        // GET: api/Carts/4/5
         [HttpGet("{productId}/{userId}")]
         public async Task<ActionResult> GetSingleCartItem(long productId, long userId)
         {
@@ -223,7 +187,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             if (item == null)
             {
                 message = "Cart item not found.";
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems/{productId}/{userId}: {message}");
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{productId}/{userId}: {message}");
 
                 return NotFound(new ApiResponseDTO
                 {
@@ -233,7 +197,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
 
             message = "Found.";
-            _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems/{productId}/{userId}: {message}");
+            _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{productId}/{userId}: {message}");
 
             return Ok(new ApiResponseDTO
             {
@@ -245,7 +209,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
         }
 
         // 4.b. Provide endpoint to get single item - GET
-        // GET: api/CartItems/5
+        // GET: api/Carts/5
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCartItem(long id)
         {
@@ -255,7 +219,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             if (item == null)
             {
                 message = "Cart item not found.";
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems/{id}: {message}");
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{id}: {message}");
 
                 return NotFound(new ApiResponseDTO
                 {
@@ -265,7 +229,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
 
             message = "Found.";
-            _logger.LogInformation($"[{DateTime.Now}] GET: api/CartItems/{id}: {message}");
+            _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{id}: {message}");
 
             return Ok(new ApiResponseDTO
             {
