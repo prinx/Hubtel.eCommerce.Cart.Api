@@ -43,7 +43,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
         {
             _context.ChangeTracker.LazyLoadingEnabled = false;
 
-            var items = _context.CartItems;
+            var items = _context.CartItems.AsNoTracking();
 
             if (queryParams.PhoneNumber != default)
             {
