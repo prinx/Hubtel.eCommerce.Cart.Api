@@ -86,6 +86,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             }
 
             items.Include(item => item.Product);
+            items.Include(item => item.User);
 
             var query = items.AsQueryable();
 
@@ -106,6 +107,7 @@ namespace Hubtel.eCommerce.Cart.Api.Services
             _context.ChangeTracker.LazyLoadingEnabled = false;
             return await _context.CartItems
                 .Include(e => e.Product)
+                .Include(e => e.User)
                 .FirstOrDefaultAsync(e => e.ProductId == productId && e.UserId == userId);
         }
 
