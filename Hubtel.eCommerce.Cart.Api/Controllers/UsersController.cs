@@ -31,18 +31,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             _usersService.ValidateGetUsersQueryString(page, pageSize);
             var users = await _usersService.GetUsers(page, pageSize);
 
-            if (users.Items.Count <= 0)
-            {
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/Users: No user found.");
-
-                return NotFound(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.NotFound,
-                    Message = "No user found.",
-                    Data = users
-                });
-            }
-
             return Ok(new ApiResponseDTO
             {
                 Status = (int)HttpStatusCode.OK,

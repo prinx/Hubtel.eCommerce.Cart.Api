@@ -31,18 +31,6 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             _productsService.ValidateGetProductsQueryString(page, pageSize);
             var users = await _productsService.GetProducts(page, pageSize);
 
-            if (users.Items.Count <= 0)
-            {
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/Products: No product found.");
-
-                return NotFound(new ApiResponseDTO
-                {
-                    Status = (int)HttpStatusCode.NotFound,
-                    Message = "No product found.",
-                    Data = users
-                });
-            }
-
             return Ok(new ApiResponseDTO
             {
                 Status = (int)HttpStatusCode.OK,
