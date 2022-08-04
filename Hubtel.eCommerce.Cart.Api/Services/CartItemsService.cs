@@ -41,6 +41,8 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<Pagination<CartItem>> GetCartItems(CartItemGetManyParams queryParams)
         {
+            _context.ChangeTracker.LazyLoadingEnabled = false;
+
             var items = _context.CartItems;
 
             if (queryParams.PhoneNumber != default)
@@ -180,6 +182,8 @@ namespace Hubtel.eCommerce.Cart.Api.Services
 
         public async Task<CartItem> CreateCartItem(CartItemPostDTO item)
         {
+            _context.ChangeTracker.LazyLoadingEnabled = false;
+
             var newItem = new CartItem
             {
                 UserId = item.UserId,
