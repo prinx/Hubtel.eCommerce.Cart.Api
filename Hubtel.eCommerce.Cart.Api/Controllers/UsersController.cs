@@ -35,7 +35,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             {
                 Status = (int)HttpStatusCode.OK,
                 Success = true,
-                Message = "Ok",
+                Message = $"{users.Items.Count} user(s) found",
                 Data = users
             });
         }

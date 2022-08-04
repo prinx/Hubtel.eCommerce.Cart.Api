@@ -29,14 +29,14 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             [FromQuery] int pageSize = 3)
         {
             _productsService.ValidateGetProductsQueryString(page, pageSize);
-            var users = await _productsService.GetProducts(page, pageSize);
+            var products = await _productsService.GetProducts(page, pageSize);
 
             return Ok(new ApiResponseDTO
             {
                 Status = (int)HttpStatusCode.OK,
                 Success = true,
-                Message = "Ok",
-                Data = users
+                Message = $"{products.Items.Count} product(s) found",
+                Data = products
             });
         }
 
