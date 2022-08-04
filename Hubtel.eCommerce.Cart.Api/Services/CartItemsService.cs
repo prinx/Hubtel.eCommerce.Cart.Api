@@ -85,10 +85,9 @@ namespace Hubtel.eCommerce.Cart.Api.Services
                 items.Where(e => e.CreatedAt <= queryParams.To);
             }
 
-            items.Include(item => item.Product);
-            items.Include(item => item.User);
-
-            var query = items.AsQueryable();
+            var query = items.Include(item => item.Product)
+                .Include(item => item.User)
+                .AsQueryable();
 
             return await PaginationService.Paginate(query, queryParams.Page, queryParams.PageSize);
         }
