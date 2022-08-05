@@ -74,14 +74,14 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // 2.a. Provide an endpoint to remove an item from cart - DELETE verb
         // DELETE: api/Carts/5/2
-        [HttpDelete("{productId}/{userId}")]
-        public async Task<IActionResult> DeleteCartItem(long productId, long userId)
+        [HttpDelete("{userId}/{productId}")]
+        public async Task<IActionResult> DeleteCartItem(long userId, long productId)
         {
             var cartItem = await _cartItemsService.RetrieveFullCartItem(productId, userId);
 
             if (cartItem == null)
             {
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{productId}/{userId}: Cart item does not exist.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{userId}/{productId}: Cart item does not exist.");
 
                 return NotFound(new ApiResponseDTO
                 {
@@ -94,7 +94,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
             if (!deleted)
             {
-                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{productId}/{userId}: Error while deleting cart item from database.");
+                _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{userId}/{productId}: Error while deleting cart item from database.");
                 
                 return InternalServerError(new ApiResponseDTO
                 {
@@ -103,7 +103,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
                 });
             }
 
-            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{productId}/{userId}: Cart item deleted successfully.");
+            _logger.LogInformation($"[{DateTime.Now}] DELETE: api/Carts/{userId}/{productId}: Cart item deleted successfully.");
 
             return Ok(new ApiResponseDTO
             {
@@ -180,8 +180,8 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
 
         // 4.a. Provide endpoint to get single item - GET
         // GET: api/Carts/4/5
-        [HttpGet("{productId}/{userId}")]
-        public async Task<ActionResult> GetSingleCartItem(long productId, long userId)
+        [HttpGet("{userId}/{productId}")]
+        public async Task<ActionResult> GetSingleCartItem(long userId, long productId)
         {
             string message;
             var item = await _cartItemsService.GetSingleCartItem(productId, userId);
@@ -189,7 +189,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             if (item == null)
             {
                 message = "Cart item not found.";
-                _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{productId}/{userId}: {message}");
+                _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{userId}/{productId}: {message}");
 
                 return NotFound(new ApiResponseDTO
                 {
@@ -199,7 +199,7 @@ namespace Hubtel.eCommerce.Cart.Api.Controllers
             }
 
             message = "Found.";
-            _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{productId}/{userId}: {message}");
+            _logger.LogInformation($"[{DateTime.Now}] GET: api/Carts/{userId}/{productId}: {message}");
 
             return Ok(new ApiResponseDTO
             {
